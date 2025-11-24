@@ -6,25 +6,25 @@ metadata:
 spec:
   project: default
 
-  source:
-    repoURL: https://chartmuseum.github.io/charts
-    chart: chartmuseum
+  sources:
+  - repoURL: https://github.com/sidhuni/apps-repo.git
+    targetRevision: main
+    ref: values
+
+  - repoURL: https://chartmuseum.github.io/charts
     targetRevision: 3.10.1
+    chart: chartmuseum
     helm:
-      values: |
-        env:
-          open:
-            DISABLE_API: false
-        service:
-          type: NodePort
-          nodePort: 30080
-          port: 8080
+      valueFiles:
+        - $values/apps/chartmuseum/values.yaml
 
   destination:
+    server: https://kubernetes.default.svc
     namespace: chartmuseum
-    name: in-cluster
 
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - Validate=false

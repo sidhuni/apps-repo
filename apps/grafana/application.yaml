@@ -6,22 +6,21 @@ metadata:
 spec:
   project: default
 
-  source:
-    repoURL: https://grafana.github.io/helm-charts
+  sources:
+  - repoURL: https://github.com/sidhuni/apps-repo.git
+    targetRevision: main
+    ref: values
+
+  - repoURL: https://grafana.github.io/helm-charts
     chart: grafana
-    targetRevision: 7.3.9
+    targetRevision: 8.8.0
     helm:
-      values: |
-        service:
-          type: ClusterIP
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
+      valueFiles:
+        - $values/apps/grafana/values.yaml
 
   destination:
+    server: https://kubernetes.default.svc
     namespace: grafana
-    name: in-cluster
 
   syncPolicy:
     automated:
