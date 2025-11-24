@@ -1,30 +1,26 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: chartmuseum
+  name: grafana
   namespace: argocd
 spec:
   project: default
-
   sources:
   - repoURL: https://github.com/sidhuni/apps-repo.git
     targetRevision: main
     ref: values
-
-  - repoURL: https://chartmuseum.github.io/charts
-    targetRevision: 3.10.1
-    chart: chartmuseum
+  - repoURL: https://grafana.github.io/helm-charts
+    chart: grafana
+    targetRevision: 8.4.2   # choose the version you want
     helm:
       valueFiles:
-        - $values/apps/chartmuseum/values.yaml
-
+      - $values/grafana/values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: chartmuseum
-
+    namespace: grafana
   syncPolicy:
     automated:
       prune: true
-      selfHeal: true
+      allowEmpty: false
     syncOptions:
-      - Validate=false
+    - Validate=false

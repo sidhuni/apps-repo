@@ -1,0 +1,75 @@
+# ChartMuseum configuration values
+
+image:
+  repository: ghcr.io/chartmuseum/chartmuseum
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Expose ChartMuseum service
+service:
+  type: ClusterIP
+  port: 8080
+
+# Enable persistence if storing charts locally
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  storageClass: ""   # set to your storage class (gp2, standard, nfs, etc.)
+
+# Ingress configuration
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - name: chartmuseum.local
+      path: /
+  tls: []   # example:
+            # - secretName: chartmuseum-tls
+            #   hosts:
+            #     - chartmuseum.example.com
+
+# ChartMuseum server configurations
+env:
+  open:
+    STORAGE: local
+    STORAGE_LOCAL_ROOTDIR: /storage
+    DEBUG: false
+    ALLOW_OVERWRITE: true
+    CHART_POST_FORM_FIELD_NAME: chart
+    PROV_POST_FORM_FIELD_NAME: prov
+    DISABLE_API: false
+
+# Enable metrics for Prometheus
+metrics:
+  enabled: true
+
+# Resource requests and limits
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 300m
+    memory: 512Mi
+
+# Liveness & readiness probes
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 10
+  timeoutSeconds: 5
+  periodSeconds: 10
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  timeoutSeconds: 5
+  periodSeconds: 10
+  failureThreshold: 3
+
+# NodeSelector, tolerations, affinities (optional)
+nodeSelector: {}
+tolerations: []
+affinity: {}

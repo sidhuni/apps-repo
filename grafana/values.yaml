@@ -1,0 +1,11 @@
+replicaCount: 1
+
+adminUser: admin
+adminPassword: admin
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
