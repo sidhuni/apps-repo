@@ -1,64 +1,41 @@
-# ------------------------------
-# Grafana Values
-# ------------------------------
-
 replicaCount: 1
 
-# Image
-image:
-  repository: grafana/grafana
-  tag: 10.2.3
-  pullPolicy: IfNotPresent
+adminUser: admin
+adminPassword: admin123
 
-# Service
 service:
   type: ClusterIP
   port: 3000
 
-# Ingress
 ingress:
-  enabled: true
-  className: nginx
-  annotations: {}
-  hosts:
-    - host: grafana.local
-      paths:
-        - path: /
-          pathType: Prefix
-  tls: []
+  enabled: false
 
-# Admin credentials
-adminUser: admin
-adminPassword: admin@123   # change for production
-
-# Persistent storage
 persistence:
   enabled: true
-  size: 10Gi
-  storageClass: ""
+  size: 5Gi
+  accessModes:
+    - ReadWriteOnce
 
-# Resources
-resources:
-  limits:
-    cpu: 300m
-    memory: 512Mi
-  requests:
-    cpu: 150m
-    memory: 256Mi
+grafana.ini:
+  security:
+    allow_embedding: true
 
-# Datasources (optional example)
+dashboardsProvider:
+  enabled: true
+
+dashboards:
+  default:
+    node-exporter:
+      gnetId: 11074
+      revision: 9
+      datasource: Prometheus
+
 datasources:
   datasources.yaml:
     apiVersion: 1
-    datasources: []
-
-# Liveness / Readiness Probes
-livenessProbe:
-  httpGet:
-    path: /api/health
-    port: 3000
-
-readinessProbe:
-  httpGet:
-    path: /api/health
-    port: 3000
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      access: proxy
+      url: http://prometheus-server.default.svc.cluster.local
+      isDefault: true
