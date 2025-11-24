@@ -5,28 +5,26 @@ metadata:
   namespace: argocd
 spec:
   project: default
-
   sources:
-    - repoURL: https://grafana.github.io/helm-charts
-      chart: grafana
-      targetRevision: 8.4.2
-      helm:
-        valueFiles:
-          - $values/grafana/values.yaml
+  - repoURL: https://grafana.github.io/helm-charts
+    chart: grafana
+    targetRevision: 8.4.2
+    helm:
+      valueFiles:
+      - $values/grafana/values.yaml
 
-    - repoURL: https://github.com/sidhuni/apps-repo.git
-      targetRevision: main
-      ref: values
+  - repoURL: https://github.com/sidhuni/apps-repo.git
+    targetRevision: main
+    ref: values
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: grafana    # ← ArgoCD must create this
+    namespace: grafana
 
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-
     syncOptions:
-      - CreateNamespace=true   # ← REQUIRED
+      - CreateNamespace=true     # ✅ THIS IS REQUIRED
       - Validate=false
