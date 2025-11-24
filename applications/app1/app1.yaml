@@ -3,19 +3,20 @@ kind: Application
 metadata:
   name: app1
   namespace: argocd
-
 spec:
   project: default
 
-  sources:
-    - repoURL: http://chartmuseum.chartmuseum.svc.cluster.local:8080
-      chart: common-app-chart
-      targetRevision: 0.1.0
-      helm:
-        valueFiles:
-          - $valuesrepo/app1/values.yaml
+  source:
+    repoURL: http://mycharts       # ChartMuseum repo name (from helm repo add)
+    chart: common-app-chart
+    targetRevision: 0.1.0
 
-    - repoURL: https://github.com/sidhuni/helm-values-repo.git
+    helm:
+      valueFiles:
+        - $valuesrepo/app1/values.yaml
+
+  sources:
+    - repoURL: https://github.com/sidhuni/my-checksum-helmchart.git
       targetRevision: main
       ref: valuesrepo
 
@@ -29,4 +30,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-
