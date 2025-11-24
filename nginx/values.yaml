@@ -1,5 +1,10 @@
 replicaCount: 1
 
+image:
+  repository: bitnami/nginx
+  tag: 1.27.2
+  pullPolicy: IfNotPresent
+
 service:
   type: ClusterIP
   port: 80
