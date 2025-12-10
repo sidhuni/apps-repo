@@ -12,7 +12,7 @@ spec:
   sources:
   # Source 1: The Kafka Chart (Bitnami Repository)
   - repoURL: https://charts.bitnami.com/bitnami
-    targetRevision: 29.1.5 # <--- REQUIRED: Pinned to a stable Bitnami chart version (e.g., 29.1.5)
+    targetRevision: 32.4.3  # <--- REQUIRED: Pinned to a stable Bitnami chart version (e.g., 29.1.5)
     chart: kafka
     helm:
       # Tell Helm where to find the custom values file
