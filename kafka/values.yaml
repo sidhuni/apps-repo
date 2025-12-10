@@ -21,7 +21,7 @@ resources:
     memory: "1536Mi" # Increase request
     cpu: "250m"
   limits:
-    memory: "3072Mi" # INCREASE TO 2 GiB for stability
+    memory: "4096Mi" # INCREASE TO 2 GiB for stability
     cpu: "500m"
 
 # --- Use pre-created secrets ---
