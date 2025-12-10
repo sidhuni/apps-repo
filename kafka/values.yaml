@@ -1,29 +1,29 @@
-# In: https://github.com/sidhuni/tools-app.git/kafka/values.yaml
-
-# --- Bitnami Kafka Chart Overrides ---
-
 auth:
+  # Disable SASL/TLS authentication for simple local use
   enabled: false
 
 listeners:
   client:
+    # Use unsecured plaintext protocol
     protocol: PLAINTEXT
 
-# Use legacy images due to Bitnami's repository migration
+# Use the legacy image repository to resolve ErrImagePull issues
 image:
   repository: bitnamilegacy/kafka
+  # We omit the tag here; it will default to a stable tag used by chart 32.4.3
 
 defaultInitContainers:
   prepareConfig:
     image:
       repository: bitnamilegacy/kafka
 
-# Ensure the controller starts up fast for local Rancher Desktop testing
+# --- 2. LOCAL CLUSTER SIZING ---
 controller:
+  # Use a single controller/broker for resource efficiency on a Mac (KRaft mode)
   replicaCount: 1
 
-# Provide basic resource limits to prevent pod failure on small clusters
 resources:
+  # Set reasonable limits for Rancher Desktop to prevent crashes
   requests:
     memory: "512Mi"
     cpu: "250m"
@@ -31,21 +31,16 @@ resources:
     memory: "1024Mi"
     cpu: "500m"
 
-# =================================================================
-# === FINAL FIXES FOR ARGOCD STABILITY (MUST BE ADDED) ===
-# =================================================================
+# --- 3. ARGOCD STABILITY FIXES (REQUIRED FOR SYNC STATUS) ---
 
-# 1. Instruct the Helm Chart to use the secrets we created manually.
-#    (These need to be created via kubectl first, see Step 2)
+# This instructs the Helm chart to look for an existing secret containing the
+# stable cluster ID instead of generating a new one every time.
+# NOTE: The secret 'my-kafka-cluster-kraft' MUST be created manually beforehand.
 kraft:
   clusterIdSecret: my-kafka-cluster-kraft
 
-sasl:
-  interBrokerSecret: my-kafka-cluster-user-passwords
-  controllerSecret: my-kafka-cluster-user-passwords
-
-# 2. Add the Helm Resource Policy Annotation (The Sync Fix)
+# This is the final, most robust fix for the Out-of-Sync problem.
+# It tells Helm to deploy the secrets/configmaps once and then STOP managing them.
+# This stabilizes the checksum annotations on the StatefulSet.
 commonAnnotations:
-  # This annotation tells Helm: "Do not touch the resource once created."
-  # This prevents the checksum/data differences from causing the Out of Sync state.
   "helm.sh/resource-policy": keep
