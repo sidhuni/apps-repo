@@ -10,19 +10,25 @@ metadata:
     argocd.argoproj.io/compare-options: IgnoreExtraneous
     argocd.argoproj.io/resource-ignore-differences: |
       all:
-      # 1. Ignore the entire data field for ALL Secrets
+      # 1. Broad ignore for Secrets (We assume these are now stable)
       - jsonPointers:
         - /data
         - /stringData
-        - /metadata/annotations
+        - /metadata/annotations/argocd.argoproj.io~1tracking-id
+        - /metadata/annotations/checksum~1secret
         group: v1
         kind: Secret
 
-      # 2. TARGET THE STATEFULSET ANNOTATIONS DIRECTLY
+      # 2. Comprehensive ignore for the StatefulSet metadata and its pod template (CRITICAL FIX)
       - jsonPointers:
-        - /metadata/annotations/checksum~1configuration
-        - /metadata/annotations/checksum~1secret
-        - /spec/template/metadata/annotations
+        # Ignore annotations on the STS itself (checksums)
+        - /metadata/annotations 
+        # Ignore resource normalization differences (1000m vs 1)
+        - /spec/template/spec/containers/0/resources/limits/cpu
+        - /spec/template/spec/containers/0/resources/requests/cpu
+        # Ignore finalizers, resourceVersions, and other Kubernetes injections
+        - /metadata/finalizers
+        - /metadata/resourceVersion
         group: apps
         kind: StatefulSet
 spec:
