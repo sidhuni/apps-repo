@@ -6,6 +6,19 @@ metadata:
   namespace: argocd
   finalizers:
   - resources-finalizer.argocd.argoproj.io
+  annotations:
+    # 1. Ignore volatile fields in Secrets and StatefulSets to achieve permanent Sync status
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/resource-ignore-differences: |
+      all:
+      - jsonPointers:
+        - /data
+        group: v1
+        kind: Secret
+      - jsonPointers:
+        - /spec/template/metadata/annotations
+        group: apps
+        kind: StatefulSet
 spec:
   project: default
 
