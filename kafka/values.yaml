@@ -18,10 +18,10 @@ controller:
 
 resources:
   requests:
-    memory: "1024Mi" # Increase request
+    memory: "1536Mi" # Increase request
     cpu: "250m"
   limits:
-    memory: "2048Mi" # INCREASE TO 2 GiB for stability
+    memory: "3072Mi" # INCREASE TO 2 GiB for stability
     cpu: "500m"
 
 # --- Use pre-created secrets ---
