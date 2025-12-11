@@ -54,7 +54,7 @@ controller:
       cpu: "1"
 
   persistence:
-    enabled: true
+    enabled: flase
     accessModes:
       - ReadWriteOnce
     size: 10Gi
