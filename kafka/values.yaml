@@ -53,21 +53,6 @@ controller:
       memory: "2Gi"
       cpu: "1"
 
-  persistence:
-    enabled: true
-    accessModes:
-      - ReadWriteOnce
-    size: 10Gi
-    mountPath: /bitnami/kafka
-
-metrics:
-  jmx:
-    enabled: true
-    kafkaJmxPort: 5555
-  serviceMonitor:
-    enabled: true
-  prometheusRule:
-    enabled: true
 
 externalAccess:
   enabled: false
