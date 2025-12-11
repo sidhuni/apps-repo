@@ -62,12 +62,12 @@ controller:
 
 metrics:
   jmx:
-    enabled: true
+    enabled: false
     kafkaJmxPort: 5555
   serviceMonitor:
-    enabled: true
+    enabled: false
   prometheusRule:
-    enabled: true
+    enabled: false
 
 externalAccess:
   enabled: false
