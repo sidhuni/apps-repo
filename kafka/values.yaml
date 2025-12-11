@@ -47,11 +47,11 @@ controller:
 
   resources:
     requests:
-      memory: "2Gi"
-      cpu: "1"
+      memory: "2048Mi"
+      cpu: "250Mi"
     limits:
-      memory: "2Gi"
-      cpu: "1"
+      memory: "4096Mi"
+      cpu: "500Mi"
 
 
 externalAccess:
