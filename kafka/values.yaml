@@ -21,8 +21,10 @@ listeners:
     sslClientAuth: ""
 
 image:
- repository: bitnamilegacy/kafka
+ repository: bitnami/kafka
 
+
+kraftVersion: 1
 
 
 
@@ -42,12 +44,13 @@ overrideConfiguration:
   num.network.threads: "8" # Number of threads to handle network requests.
   num.io.threads: "16" # Number of threads to handle I/O operations.
 
-  unclean.leader.election.enable: "true" 
+  unclean.leader.election.enable: "false" 
   leader.imbalance.per.broker.percentage: "10" # Maximum allowed leader imbalance percentage per broker.
 
 controller:
 
   replicaCount: 1
+  heapOpts: -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75
 
   resources:
   requests:
@@ -60,7 +63,7 @@ controller:
 
 
   persistence:
-    enabled: false
+    enabled: true
     accessModes:
       - ReadWriteOnce
     size: 10Gi
