@@ -70,7 +70,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - RespectIgnoreDifferences=true # Ensure the ignore rules above are respected
-    ignoreDifferences:
+  ignoreDifferences:
     - group: ""
       kind: Service
       jsonPointers:
