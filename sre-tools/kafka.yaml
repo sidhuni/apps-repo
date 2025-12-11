@@ -13,11 +13,11 @@ spec:
       valueFiles:
       - $values/kafka/values.yaml
   - repoURL: https://github.com/sidhuni/tools-app.git
-    targetRevision: stage
+    targetRevision: main
     ref: values
   destination:
     server: https://kubernetes.default.svc
-    namespace: kafka
+    namespace: kafka-dev
   syncPolicy:
     syncOptions:
     - CreateNamespace=true
