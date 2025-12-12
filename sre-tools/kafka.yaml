@@ -71,8 +71,3 @@ spec:
         - /metadata/uid
         - /metadata/resourceVersion
         - /metadata/managedFields
-
-    - group: apps
-      kind: StatefulSet
-      jqPathExpressions:
-        - .spec.volumeClaimTemplates[]?.metadata
