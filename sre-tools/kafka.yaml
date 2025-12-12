@@ -28,34 +28,38 @@ spec:
       prune: true
       selfHeal: true
   ignoreDifferences:
+    # Service NodePort (Already done)
     - group: ""
       kind: Service
       jsonPointers:
         - /spec/ports/0/nodePort
 
-    - group: ""
-      kind: PersistentVolumeClaim
-      jsonPointers:
-        - /metadata/creationTimestamp
-        - /metadata/uid
-        - /metadata/resourceVersion
-        - /metadata/managedFields # K8s adds this automatically
-
-    # If you must ignore spec.resources for PVCs
+    # PVC Metadata & Resources (Already done)
     - group: ""
       kind: PersistentVolumeClaim
       jqPathExpressions:
+        - .metadata.creationTimestamp
+        - .metadata.uid
+        - .metadata.resourceVersion
+        - .metadata.managedFields
         - .spec.resources
 
-    # Your StatefulSet template metadata ignore (which is fine)
+    # StatefulSet template metadata (Already done, but extending to checksums)
     - group: apps
       kind: StatefulSet
       jqPathExpressions:
         - .spec.volumeClaimTemplates[]?.metadata
 
+    # StatefulSet Metadata (Already done)
+    - group: apps
+      kind: StatefulSet
+      jsonPointers:
+        - /metadata/creationTimestamp
+        - /metadata/uid
+        - /metadata/resourceVersion
+        - /metadata/managedFields
 
-
-
+    # Secret Metadata (Already done)
     - group: ""
       kind: Secret
       jsonPointers:
@@ -63,11 +67,19 @@ spec:
         - /metadata/uid
         - /metadata/resourceVersion
         - /metadata/managedFields
+        
+    # --- NEW RULES TO FIX DRIFT ---
 
+    # 1. Ignore Secret Data (fixes the Kraft ID drift)
+    - group: ""
+      kind: Secret
+      jsonPointers:
+        - /data
+
+    # 2. Ignore Checksum Annotations in StatefulSet template (fixes the checksum drift)
     - group: apps
       kind: StatefulSet
       jsonPointers:
-        - /metadata/creationTimestamp
-        - /metadata/uid
-        - /metadata/resourceVersion
-        - /metadata/managedFields
+        - /spec/template/metadata/annotations/checksum~1configuration
+        - /spec/template/metadata/annotations/checksum~1jmx-configuration
+        - /spec/template/metadata/annotations/checksum~1secret
