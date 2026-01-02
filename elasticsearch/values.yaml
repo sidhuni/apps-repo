@@ -31,22 +31,20 @@ persistence:
   enabled: false
 
 # Sysctl init container (needed for Elasticsearch)
-sysctlImage:
-  repository: public.ecr.aws/docker/library/busybox
-  tag: latest
-
-# Or if your chart uses the 'extraInitContainers' block:
-extraInitContainers:
-  - name: sysctl
-    image: public.ecr.aws/docker/library/busybox:latest
-    # Change the command to use sh instead of bash
-    command: 
-      - /bin/sh
-      - -c
-      - sysctl -w vm.max_map_count=262144
-    securityContext:
-      privileged: true
-      runAsUser: 0  # Force root to ensure sysctl has permission
+sysctl:
+  enabled: true
+  image:
+    repository: public.ecr.aws/docker/library/busybox
+    tag: latest
+    pullPolicy: IfNotPresent
+  # OVERRIDE: Use /bin/sh because Busybox does not have /bin/bash
+  command:
+    - /bin/sh
+    - -c
+    - sysctl -w vm.max_map_count=262144
+  securityContext:
+    privileged: true
+    runAsUser: 0
 
 # Probes
 readinessProbe:
