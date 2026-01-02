@@ -1,50 +1,45 @@
-replicaCount: 1
-
-image:
-  repository: bitnamilegacy/elasticsearch
-  tag: 7.17.9-debian-11-r0
-
-global:
-  security:
-    allowInsecureImages: true
-
-clusterName: "es-cluster"
-
+# Simplified for local Rancher Desktop development
+clusterName: "elasticsearch"
 nodeGroup: "master"
 
-esConfig:
-  elasticsearch.yml: |
-    cluster.name: "es-cluster"
-    network.host: 0.0.0.0
-    discovery.type: single-node
+# In ES 8.x, nodes often take all roles by default in small clusters
+roles:
+  - master
+  - data
+  - data_content
+  - data_hot
+  - ingest
+  - remote_cluster_client
 
+# Local dev usually only needs 1 or 3 replicas. 
+# Using 1 for resource efficiency on Mac.
+replicas: 1
+minimumMasterNodes: 1
+
+# Resource adjustments for local machine
 resources:
   requests:
-    memory: "1Gi"
     cpu: "500m"
+    memory: "1Gi"
   limits:
+    cpu: "1000m"
     memory: "2Gi"
-    cpu: "1"
 
-persistence:
-  enabled: true
-  storageClass: "local-path"
-  size: 5Gi
+# Increase JVM heap size to match memory limits
+esJavaOpts: "-Xmx1g -Xms1g"
 
+# Persistence settings for Rancher Desktop (uses local-path storage by default)
+volumeClaimTemplate:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 5Gi
+
+# Security: Set to false for easier local testing (re-enable for production!)
+# Note: ES 8.x has security on by default. This chart handles cert generation.
+createCert: true
+
+# Helpful for local access via localhost:9200 if you port-forward
 service:
   type: ClusterIP
-  port: 9200
-
-readinessProbe:
-  httpGet:
-    path: /
-    port: 9200
-  initialDelaySeconds: 20
-  timeoutSeconds: 5
-
-livenessProbe:
-  httpGet:
-    path: /
-    port: 9200
-  initialDelaySeconds: 60
-  timeoutSeconds: 5
+  httpPort: 9200
