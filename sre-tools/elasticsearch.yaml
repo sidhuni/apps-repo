@@ -6,15 +6,15 @@ metadata:
 spec:
   project: default
   sources:
-  - repoURL: 'https://helm.elastic.co'
-    chart: elasticsearch
-    targetRevision: 7.16.2
-    helm:
-      valueFiles:
-        - $values/elasticsearch/values.yaml
-  - repoURL: 'https://github.com/sidhuni/tools-app.git'
-    targetRevision: main
-    ref: values
+    - repoURL: 'https://helm.elastic.co'
+      chart: elasticsearch
+      targetRevision: 7.16.2
+      helm:
+        valueFiles:
+          - $values/elasticsearch/values.yaml # Path in your Git repo
+    - repoURL: 'https://github.com/sidhuni/tools-app.git'
+      targetRevision: main
+      ref: values # This label matches the $values alias above
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: elasticsearch
@@ -24,14 +24,13 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
+      - ServerSideApply=true # Mandatory for large ES resources
   ignoreDifferences:
-    - group: policy
-      kind: PodDisruptionBudget
-      jsonPointers:
-        - /spec/selector
     - group: ""
       kind: Service
       name: elasticsearch-master-headless
-      jsonPointers:
-        - /spec/clusterIP
+      jsonPointers: [ "/spec/clusterIP" ]
+    - group: policy
+      kind: PodDisruptionBudget
+      name: elasticsearch-master-pdb
+      jsonPointers: [ "/spec/selector" ]
