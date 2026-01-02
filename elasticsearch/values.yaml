@@ -1,10 +1,12 @@
 replicaCount: 1
 
 image:
-  registry: docker.io
-  repository: bitnami/elasticsearch
+  repository: bitnamilegacy/elasticsearch
   tag: 7.17.9-debian-11-r0
-  pullPolicy: IfNotPresent
+
+global:
+  security:
+    allowInsecureImages: true
 
 clusterName: "es-cluster"
 
