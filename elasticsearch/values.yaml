@@ -1,19 +1,22 @@
 clusterName: "elasticsearch"
 nodeGroup: "master"
 
-# OFFICIAL CHART FORMAT (MUST BE A STRING)
-image: docker.elastic.co/elasticsearch/elasticsearch
-imageTag: 8.5.1
-imagePullPolicy: IfNotPresent
-
-# Required for the Official Chart to start on a single node
-extraEnvs:
-  - name: "discovery.type"
-    value: "single-node"
+# Format for Official Elastic Chart
+image: "docker.elastic.co/elasticsearch/elasticsearch"
+imageTag: "8.5.1"
+imagePullPolicy: "IfNotPresent"
 
 replicas: 1
 
-# Resource limits for Rancher Desktop
+# THE CRITICAL FIXES
+extraEnvs:
+  - name: "discovery.type"
+    value: "single-node"
+  # This prevents the chart from trying to find other nodes
+  - name: "cluster.initial_master_nodes"
+    value: ""
+
+# Resource Bump - 8.x needs 2Gi to even start the security layers
 resources:
   requests:
     cpu: "500m"
@@ -24,13 +27,12 @@ resources:
 
 esJavaOpts: "-Xmx1g -Xms1g"
 
-# Disable the Bitnami-style sysctl and use the Official style
+# We disable this because we ran the 'rdctl' command manually above
 sysctlInitContainer:
   enabled: false
 
-# Accept 'yellow' status for 1-node setup
 clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
 
 readinessProbe:
-  initialDelaySeconds: 90
+  initialDelaySeconds: 60
   periodSeconds: 10
