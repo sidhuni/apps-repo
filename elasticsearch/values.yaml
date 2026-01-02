@@ -43,3 +43,6 @@ createCert: true
 service:
   type: ClusterIP
   httpPort: 9200
+
+sysctlImage:
+  enabled: false
