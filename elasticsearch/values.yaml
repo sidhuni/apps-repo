@@ -9,9 +9,6 @@ imagePullPolicy: IfNotPresent
 extraEnvs:
   - name: "discovery.type"
     value: "single-node"
-  # We use a space to 'blank' out the chart's default if it's being stubborn
-  - name: "cluster.initial_master_nodes"
-    value: " " 
 
 # Set replicas to 1
 replicas: 1
