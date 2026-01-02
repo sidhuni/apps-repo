@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: 'https://helm.elastic.co'
+    - repoURL: https://charts.bitnami.com/bitnami
       chart: elasticsearch
       targetRevision: 19.10.3
       helm:
