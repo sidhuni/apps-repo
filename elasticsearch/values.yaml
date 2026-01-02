@@ -3,7 +3,6 @@ image:
   registry: docker.io
   repository: bitnamilegacy/elasticsearch
   tag: 7.17.10
-  pullPolicy: IfNotPresent
 
 ## Standardizing for local Rancher Desktop
 global:
