@@ -2,11 +2,11 @@ replicas: 1
 # Lowering resources so they fit on smaller nodes
 resources:
   requests:
-    cpu: "500m"
-    memory: "1Gi"
+    cpu: "100m"
+    memory: "128Mi"
   limits:
     cpu: "1000m"
-    memory: "2Gi"
+    memory: "512Mi"
 
 # If Init Container is failing, try forcing a standard image
 extraInitContainers:
