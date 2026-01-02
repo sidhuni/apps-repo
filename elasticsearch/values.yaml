@@ -33,12 +33,15 @@ ingest:
   replicaCount: 0
 
 # Init Container Fix (Busybox for sysctl)
-sysctl:
+ssysctl:
   enabled: true
   image:
-    repository: bitnamilegacy/os-shell
-    tag: 11-debian-11-r94
+    repository: public.ecr.aws/docker/library/busybox
+    tag: latest
   command:
     - /bin/sh
     - -c
     - sysctl -w vm.max_map_count=262144
+  securityContext:
+    privileged: true
+    runAsUser: 0
