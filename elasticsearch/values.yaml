@@ -2,6 +2,10 @@
 clusterName: "elasticsearch"
 nodeGroup: "master"
 
+image: "elasticsearch" # Docker Hub mirror
+imageTag: 8.5.1
+imagePullPolicy: IfNotPresent
+
 # In ES 8.x, nodes often take all roles by default in small clusters
 roles:
   - master
@@ -47,6 +51,4 @@ service:
 # Find the sysctl section in your values.yaml
 # Fix for the Bitnami image pull error
 sysctlInitContainer:
-  enabled: true
-  image: bitnamilegacy/os-shell # Change this from bitnami/os-shell
-  imageTag: 12-debian-12-r50  # Or use "latest"
+  enabled: false
