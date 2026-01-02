@@ -1,5 +1,3 @@
-# Stage-ready Elasticsearch Helm values.yaml
-
 clusterName: "elasticsearch"
 nodeGroup: "master"
 
