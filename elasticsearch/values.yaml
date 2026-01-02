@@ -52,3 +52,12 @@ service:
 # Fix for the Bitnami image pull error
 sysctlInitContainer:
   enabled: false
+
+clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
+
+# Also, increase the initial delay to give the JVM time to start
+readinessProbe:
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  successThreshold: 3
+  timeoutSeconds: 5
