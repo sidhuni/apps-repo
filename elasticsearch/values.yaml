@@ -1,4 +1,4 @@
-replicas: 3
+replicas: 1
 # Lowering resources so they fit on smaller nodes
 resources:
   requests:
@@ -25,4 +25,4 @@ volumeClaimTemplate:
   storageClassName: "standard" # Change this to your provider's class (e.g., gp2, longhorn)
   resources:
     requests:
-      storage: 5Gi
+      storage: 1Gi
