@@ -1,16 +1,37 @@
-## Bitnami Legacy Image Configuration
+## Bitnami Elasticsearch Legacy Configuration
+## Optimized for Rancher Desktop (Local)
+
+global:
+  imageRegistry: docker.io
+  storageClass: "local-path" # Matches Rancher Desktop default
+
+## 1. Main Elasticsearch Image
 image:
-  registry: docker.io
   repository: bitnamilegacy/elasticsearch
   tag: 7.17.10
+  pullPolicy: IfNotPresent
 
-## Standardizing for local Rancher Desktop
-global:
-  storageClass: "local-path"
+## 2. Sysctl Init Container Fix
+## Points to Legacy to avoid "Manifest Unknown" from the main Bitnami repo
+sysctl:
+  enabled: true
+  image:
+    repository: bitnamilegacy/os-shell
+    tag: 11-debian-11-r94
+  # Using sh -c is more reliable across different shell images
+  command:
+    - /bin/sh
+    - -c
+    - |
+      sysctl -w vm.max_map_count=262144
+      sysctl -w fs.file-max=65536
 
-# Combine roles to save RAM (1 pod instead of 4+)
+## 3. Resource & Role Optimization
+## This combines everything into 1 pod to save Mac RAM
 master:
   replicaCount: 1
+  persistence:
+    size: 5Gi
   resources:
     requests:
       cpu: 500m
@@ -18,13 +39,9 @@ master:
     limits:
       cpu: 1000m
       memory: 2Gi
-  persistence:
-    storageClass: "local-path"
-    size: 5Gi
   heapSize: 1024m
-   
 
-# Disable other roles for local development
+# Disable separate data/ingest/coordinating nodes for local dev
 data:
   replicaCount: 0
 coordinating:
@@ -32,16 +49,8 @@ coordinating:
 ingest:
   replicaCount: 0
 
-# Init Container Fix (Busybox for sysctl)
-ssysctl:
-  enabled: true
-  image:
-    repository: public.ecr.aws/docker/library/busybox
-    tag: latest
-  command:
-    - /bin/sh
-    - -c
-    - sysctl -w vm.max_map_count=262144
-  securityContext:
-    privileged: true
-    runAsUser: 0
+## 4. Security Context (Bitnami 1001 standard)
+podSecurityContext:
+  fsGroup: 1001
+containerSecurityContext:
+  runAsUser: 1001
