@@ -6,8 +6,8 @@ metadata:
 spec:
   project: default
   sources:
-  - repoURL: "https://helm.elastic.co"
-    targetRevision: "7.17.3"
+  - repoURL: 'https://charts.bitnami.com/bitnami'
+    targetRevision: 7.17.9
     chart: elasticsearch
     helm:
       valueFiles:
