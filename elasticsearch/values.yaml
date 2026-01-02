@@ -1,12 +1,12 @@
+# Use the official Docker image
+image: "docker.elastic.co/elasticsearch/elasticsearch"
+imageTag: "8.11.1" # Change to your preferred version
+
+# Local environment optimizations
 replicas: 1
+minimumMasterNodes: 1
 
-# Bitnami legacy ES image
-image:
-  repository: "bitnamilegacy/elasticsearch"
-  tag: 7.17.10
-  pullPolicy: IfNotPresent
-
-# Resources
+# Resource management for local machine (Rancher Desktop)
 resources:
   requests:
     cpu: "500m"
@@ -15,45 +15,21 @@ resources:
     cpu: "1000m"
     memory: "2Gi"
 
-# Java Heap (50% of memory)
-esJavaOpts: "-Xms512m -Xmx512m"
+# Set Heap Size to half of requested memory
+esJavaOpts: "-Xmx512m -Xms512m"
 
-# Cluster single-node
-extraEnvVars:
-  - name: discovery.type
-    value: single-node
-
-# Anti-affinity (soft for single-node)
-antiAffinity: soft
-
-# Persistence disabled for local/dev
-persistence:
-  enabled: false
-
-# Sysctl init container (needed for Elasticsearch)
-sysctl:
-  enabled: true
-  image:
-    repository: public.ecr.aws/docker/library/busybox
-    tag: latest
-    pullPolicy: IfNotPresent
-  # OVERRIDE: Use /bin/sh because Busybox does not have /bin/bash
-  command:
-    - /bin/sh
-    - -c
-    - sysctl -w vm.max_map_count=262144
-  securityContext:
-    privileged: true
-    runAsUser: 0
-
-# Probes
-readinessProbe:
-  enabled: true
-livenessProbe:
-  enabled: true
-
-# Service
+# Networking
 service:
   type: ClusterIP
-  ports:
-    restAPI: 9200
+  port: 9200
+
+# Volume settings
+persistence:
+  enabled: true
+  size: 10Gi
+
+# Security (Self-signed certificates are enabled by default in 8.x)
+# If you are just testing, you might want to disable security for simplicity:
+# esConfig:
+#   elasticsearch.yml: |
+#     xpack.security.enabled: false
