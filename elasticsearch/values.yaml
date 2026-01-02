@@ -36,13 +36,14 @@ resources:
     memory: 2Gi
 
 
-sysctlImage:
-  repository: bitnami/bitnami-shell
-  tag: "11"
-
 sysctl:
   enabled: true
   vmMaxMapCount: 262144
+
+sysctlImage:
+  repository: busybox
+  tag: "1.36"
+
 
 persistence:
   enabled: false
