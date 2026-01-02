@@ -12,10 +12,10 @@ containerSecurityContext:
   runAsUser: 1001
 resources:
   requests:
-    cpu: "1000m"
+    cpu: "100m"
     memory: "1Gi" 
   limits:
-    cpu: "1000m"
+    cpu: "100m"
     memory: "2Gi"
 
 # Java Heap settings (Required for Bitnami images)
