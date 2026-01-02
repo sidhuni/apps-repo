@@ -16,10 +16,13 @@ extraInitContainers:
     securityContext:
       privileged: true
 
+persistence:
+  enabled: false
+
 # Ensure you have a storage class defined
 volumeClaimTemplate:
   accessModes: [ "ReadWriteOnce" ]
   storageClassName: "standard" # Change this to your provider's class (e.g., gp2, longhorn)
   resources:
     requests:
-      storage: 10Gi
+      storage: 5Gi
