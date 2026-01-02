@@ -7,16 +7,16 @@ replicas: 1
 minimumMasterNodes: 1
 
 # Resource management for local machine (Rancher Desktop)
-resources:
+rresources:
   requests:
-    cpu: "500m"
-    memory: "1Gi"
+    cpu: "100m"     # Lowered from 500m
+    memory: "512Mi"  # Lowered from 1Gi
   limits:
     cpu: "1000m"
-    memory: "2Gi"
+    memory: "1Gi"   # Lowered from 2Gi
 
-# Set Heap Size to half of requested memory
-esJavaOpts: "-Xmx512m -Xms512m"
+# Adjust Java Heap to match the new lower memory
+esJavaOpts: "-Xmx256m -Xms256m"
 
 # Networking
 service:
