@@ -31,13 +31,18 @@ persistence:
   enabled: false
 
 # Sysctl init container (needed for Elasticsearch)
+sysctlImage:
+  repository: public.ecr.aws/docker/library/busybox
+  tag: latest
+
+# Or if your chart uses the 'extraInitContainers' block:
 extraInitContainers:
   - name: sysctl
-    image: public.ecr.aws/docker/library/busybox:latest # Tiny & Fast
+    image: public.ecr.aws/docker/library/busybox:latest
     command: ['sysctl', '-w', 'vm.max_map_count=262144']
     securityContext:
       privileged: true
-      
+
 # Probes
 readinessProbe:
   enabled: true
