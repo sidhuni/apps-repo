@@ -2,9 +2,14 @@ clusterName: "elasticsearch"
 nodeGroup: "master"
 replicas: 1
 
+roles:
+  - master
+  - data
+  - ingest
+  - ml
+
 image: "docker.elastic.co/elasticsearch/elasticsearch"
 imageTag: "8.5.1"
-imagePullPolicy: "IfNotPresent"
 
 resources:
   requests:
@@ -19,7 +24,19 @@ esJavaOpts: "-Xms1g -Xmx1g"
 sysctlInitContainer:
   enabled: false
 
-clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
+esConfig:
+  elasticsearch.yml: |
+    discovery.type: single-node
+    cluster.initial_master_nodes: []
+
+persistence:
+  enabled: true
+  volumeClaimTemplate:
+    accessModes: ["ReadWriteOnce"]
+    resources:
+      requests:
+        storage: 30Gi
+
 
 readinessProbe:
   initialDelaySeconds: 120
@@ -27,8 +44,3 @@ readinessProbe:
   timeoutSeconds: 5
   failureThreshold: 6
 
-# 🔥 The fix:
-esConfig:
-  elasticsearch.yml: |
-    discovery.type: single-node
-    cluster.initial_master_nodes: []
