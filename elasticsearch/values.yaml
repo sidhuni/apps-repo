@@ -55,7 +55,7 @@ clusterHealthCheckParams: "wait_for_status=green&timeout=3s"
 
 # Recommended for Stage: Enable Ingress to access the API internally
 ingress:
-  enabled: true
+  enabled: false
   className: "nginx"
   hosts:
     - host: elastic-stage.yourdomain.com
