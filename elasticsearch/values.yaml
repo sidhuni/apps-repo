@@ -1,28 +1,35 @@
 replicas: 1
-# Lowering resources so they fit on smaller nodes
+
+# Image details for Bitnami Legacy
+image: "bitnamilegacy/elasticsearch"
+imageTag: "8.5.1"
+imagePullPolicy: "IfNotPresent"
+
+# Bitnami images run as non-root (1001)
+podSecurityContext:
+  fsGroup: 1001
+containerSecurityContext:
+  runAsUser: 1001
+
+# IMPORTANT: Increased Memory. 
+# 128Mi is too low for Java 8.5.1; it will crash before it starts.
 resources:
   requests:
-    cpu: "100m"
-    memory: "128Mi"
+    cpu: "200m"
+    memory: "1Gi" 
   limits:
-    cpu: "100m"
-    memory: "512Mi"
+    cpu: "1000m"
+    memory: "2Gi"
 
-# If Init Container is failing, try forcing a standard image
+# Java Heap settings (Required for Bitnami images)
+esJavaOpts: "-Xmx512m -Xms512m"
+
 extraInitContainers:
   - name: sysctl
-    image: docker.io/library/elasticsearch:8.5.1
+    image: bitnamilegacy/elasticsearch:8.5.1
     command: ['sysctl', '-w', 'vm.max_map_count=262144']
     securityContext:
       privileged: true
 
 persistence:
-  enabled: false
-
-# Ensure you have a storage class defined
-volumeClaimTemplate:
-  accessModes: [ "ReadWriteOnce" ]
-  storageClassName: "standard" # Change this to your provider's class (e.g., gp2, longhorn)
-  resources:
-    requests:
-      storage: 1Gi
+  enabled: false # Setting to false as per your request
