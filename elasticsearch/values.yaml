@@ -5,17 +5,12 @@ image: "docker.elastic.co/elasticsearch/elasticsearch"
 imageTag: "8.5.1"
 imagePullPolicy: "IfNotPresent"
 
-# 1. FORCE SINGLE NODE
-extraEnvs:
-  - name: "discovery.type"
-    value: "single-node"
-
-# 2. REMOVE DISCOVERY LOGIC
-# Do NOT define minimumMasterNodes or cluster.initial_master_nodes here.
-# Leaving them out prevents the chart from injecting the 'null' values.
 replicas: 1
 
-# 3. RESOURCE REQUIREMENTS (Essential for 8.x)
+esConfig:
+  elasticsearch.yml: |
+    discovery.type: single-node
+
 resources:
   requests:
     cpu: "500m"
@@ -26,14 +21,13 @@ resources:
 
 esJavaOpts: "-Xmx1g -Xms1g"
 
-# Disable init container if you've run the rdctl command manually
 sysctlInitContainer:
   enabled: false
 
 clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
 
 readinessProbe:
-  initialDelaySeconds: 120  # Increased from 60
+  initialDelaySeconds: 120
   periodSeconds: 10
   timeoutSeconds: 5
   failureThreshold: 6
