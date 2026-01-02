@@ -39,9 +39,14 @@ sysctlImage:
 extraInitContainers:
   - name: sysctl
     image: public.ecr.aws/docker/library/busybox:latest
-    command: ['sysctl', '-w', 'vm.max_map_count=262144']
+    # Change the command to use sh instead of bash
+    command: 
+      - /bin/sh
+      - -c
+      - sysctl -w vm.max_map_count=262144
     securityContext:
       privileged: true
+      runAsUser: 0  # Force root to ensure sysctl has permission
 
 # Probes
 readinessProbe:
