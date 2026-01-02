@@ -36,9 +36,8 @@ ingest:
 sysctl:
   enabled: true
   image:
-    registry: public.ecr.aws
-    repository: docker/library/busybox
-    tag: latest
+    repository: bitnamilegacy/os-shell
+    tag: 11-debian-11-r94
   command:
     - /bin/sh
     - -c
