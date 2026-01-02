@@ -7,15 +7,11 @@ imagePullPolicy: IfNotPresent
 
 # --- KEY FIX FOR SINGLE NODE ---
 extraEnvs:
-  # Tells ES it is alone (fixes master election crash)
   - name: "discovery.type"
     value: "single-node"
-  # MUST be empty/null to avoid conflict with single-node mode
-  - name: "cluster.initial_master_nodes"
-    value: ""
 
 replicas: 1
-minimumMasterNodes: 1
+minimumMasterNodes: 
 
 # Resource adjustments (Bumped to 2Gi for stability)
 resources:
