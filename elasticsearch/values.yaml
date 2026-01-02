@@ -10,12 +10,9 @@ podSecurityContext:
   fsGroup: 1001
 containerSecurityContext:
   runAsUser: 1001
-
-# IMPORTANT: Increased Memory. 
-# 128Mi is too low for Java 8.5.1; it will crash before it starts.
 resources:
   requests:
-    cpu: "200m"
+    cpu: "500m"
     memory: "1Gi" 
   limits:
     cpu: "1000m"
