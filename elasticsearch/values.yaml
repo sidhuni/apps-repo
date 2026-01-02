@@ -1,12 +1,29 @@
-# Simplified for local Rancher Desktop development
 clusterName: "elasticsearch"
 nodeGroup: "master"
 
-image: "elasticsearch" # Docker Hub mirror
+image: "elasticsearch"
 imageTag: 8.5.1
 imagePullPolicy: IfNotPresent
 
-# In ES 8.x, nodes often take all roles by default in small clusters
+# --- KEY FIX FOR SINGLE NODE ---
+extraEnvs:
+  - name: "discovery.type"
+    value: "single-node"
+
+replicas: 1
+minimumMasterNodes: 1
+
+# Resource adjustments (Bumped to 2Gi for stability)
+resources:
+  requests:
+    cpu: "500m"
+    memory: "2Gi"
+  limits:
+    cpu: "1000m"
+    memory: "2Gi"
+
+esJavaOpts: "-Xmx1g -Xms1g"
+
 roles:
   - master
   - data
@@ -15,49 +32,26 @@ roles:
   - ingest
   - remote_cluster_client
 
-# Local dev usually only needs 1 or 3 replicas. 
-# Using 1 for resource efficiency on Mac.
-replicas: 1
-minimumMasterNodes: 1
-
-# Resource adjustments for local machine
-resources:
-  requests:
-    cpu: "500m"
-    memory: "1Gi"
-  limits:
-    cpu: "1000m"
-    memory: "2Gi"
-
-# Increase JVM heap size to match memory limits
-esJavaOpts: "-Xmx1g -Xms1g"
-
-# Persistence settings for Rancher Desktop (uses local-path storage by default)
 volumeClaimTemplate:
   accessModes: ["ReadWriteOnce"]
   resources:
     requests:
       storage: 5Gi
 
-# Security: Set to false for easier local testing (re-enable for production!)
-# Note: ES 8.x has security on by default. This chart handles cert generation.
 createCert: true
 
-# Helpful for local access via localhost:9200 if you port-forward
 service:
   type: ClusterIP
   httpPort: 9200
 
-# Find the sysctl section in your values.yaml
-# Fix for the Bitnami image pull error
 sysctlInitContainer:
   enabled: false
 
+# Accept 'yellow' status because a 1-node cluster can never be 'green'
 clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
 
-# Also, increase the initial delay to give the JVM time to start
 readinessProbe:
-  initialDelaySeconds: 60
+  initialDelaySeconds: 90 # Increased to give JVM time to fully start
   periodSeconds: 10
   successThreshold: 3
   timeoutSeconds: 5
