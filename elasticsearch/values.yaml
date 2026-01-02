@@ -5,7 +5,7 @@ resources:
     cpu: "100m"
     memory: "128Mi"
   limits:
-    cpu: "1000m"
+    cpu: "100m"
     memory: "512Mi"
 
 # If Init Container is failing, try forcing a standard image
