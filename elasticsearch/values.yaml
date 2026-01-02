@@ -1,3 +1,4 @@
+maxUnavailable: ""
 replicas: 1
 
 # Image details (Using Official for stability, as we fixed the network)
