@@ -1,31 +1,34 @@
-# 1. Identity and Version
 clusterName: "elasticsearch"
 nodeGroup: "master"
+image: "docker.elastic.co/elasticsearch/elasticsearch"
 imageTag: "8.5.1"
 
-# 2. FORCE SINGLE NODE (This is the most important part)
-# This overrides the '3 replicas' and '2 minimum nodes' in your computed values
 replicas: 1
-minimumMasterNodes: 1
-cluster:
-  initial_master_nodes: [] # This stops the 'IllegalArgumentException'
+minimumMasterNodes: null
 
 extraEnvs:
   - name: "discovery.type"
     value: "single-node"
+  - name: "xpack.security.enabled"
+    value: "false" # Temporarily disable security to reduce RAM/Startup complexity
+  - name: "bootstrap.memory_lock"
+    value: "false"
 
-# 3. FIX FOR MAC RESOURCES
-# Your computed values show 'hard' antiAffinity; we must disable it 
-# because you only have one physical machine (your Mac).
-antiAffinity: "soft"
+cluster:
+  initial_master_nodes: []
 
 resources:
   requests:
-    memory: "1Gi"  # Elasticsearch 8.x struggles to boot on 512Mi
-    cpu: "250m"
-  limits:
-    memory: "1.5Gi" # Gives breathing room for the OS/Filesystem cache
     cpu: "500m"
+    memory: "2Gi"
+  limits:
+    cpu: "1000m"
+    memory: "2Gi"
+
+esJavaOpts: "-Xmx1g -Xms1g"
+
+sysctlInitContainer:
+  enabled: false # We handle this manually with rdctl shell
 
 # 4. STORAGE (Reduced from 30Gi to 5Gi for local testing)
 volumeClaimTemplate:
@@ -38,11 +41,6 @@ volumeClaimTemplate:
 # A 1-node cluster will NEVER be 'green' (it stays yellow). 
 # We must change your computed 'green' to 'yellow'.
 clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
-
-# 6. DISABLE PERMISSION ERRORS
-# Rancher Desktop often blocks the sysctlInitContainer.
-sysctlInitContainer:
-  enabled: false
 
 
 readinessProbe:
