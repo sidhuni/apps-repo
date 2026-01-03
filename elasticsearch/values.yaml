@@ -43,3 +43,16 @@ sysctlInitContainer:
 
 # Acceptance criteria for a 1-node setup
 clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
+
+Probes: 
+livenessProbe:
+  initialDelaySeconds: 120
+  periodSeconds: 60
+  timeoutSeconds: 10
+  failureThreshold: 5
+
+readinessProbe:
+  initialDelaySeconds: 120
+  periodSeconds: 60
+  timeoutSeconds: 5
+  failureThreshold: 3
