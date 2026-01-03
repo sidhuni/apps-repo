@@ -5,21 +5,20 @@ image: "docker.elastic.co/elasticsearch/elasticsearch"
 imageTag: "8.5.1"
 imagePullPolicy: "IfNotPresent"
 
-# 1. This is the mandatory mode for 1-node clusters
+# 1. Mandatory for single-node development
 extraEnvs:
   - name: "discovery.type"
     value: "single-node"
 
-# 2. THE SECRET FIX: This prevents the Helm chart from 
-# injecting the problematic cluster.initial_master_nodes
+# 2. THE SECRET FIX: This overrides the chart's automatic injection
+# of cluster.initial_master_nodes
 cluster:
   initial_master_nodes: [] 
 
-# 3. Explicitly set to 1 and remove any other discovery settings
 replicas: 1
 minimumMasterNodes: null
 
-# 4. Resources for Mac/Rancher stability
+# 3. Resource bump for stability on Mac
 resources:
   requests:
     cpu: "500m"
@@ -30,11 +29,10 @@ resources:
 
 esJavaOpts: "-Xmx1g -Xms1g"
 
-# Disable the init container since we run it manually
+# 4. Disable init container and set host limit manually
 sysctlInitContainer:
   enabled: false
 
-# Accept 'yellow' health status
 clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
 
 readinessProbe:
