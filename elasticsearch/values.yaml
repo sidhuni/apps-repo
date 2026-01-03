@@ -19,15 +19,16 @@ extraEnvs:
 # because you only have one physical machine (your Mac).
 antiAffinity: "soft"
 
-resources:
+esources:
   requests:
-    cpu: "500m"
-    memory: "2Gi"
+    cpu: "250m"      # Reduced from 1000m
+    memory: "1536Mi" # Reduced from 2Gi
   limits:
-    cpu: "1000m"
-    memory: "2Gi"
+    cpu: "500m"
+    memory: "1536Mi"
 
-esJavaOpts: "-Xmx1g -Xms1g"
+# IMPORTANT: You must also lower the Java Heap to fit inside the new limits
+esJavaOpts: "-Xmx768m -Xms768m"
 
 # 4. STORAGE (Reduced from 30Gi to 5Gi for local testing)
 volumeClaimTemplate:
@@ -46,7 +47,7 @@ clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
 sysctlInitContainer:
   enabled: false
 
-  
+
 readinessProbe:
   failureThreshold: 3
   initialDelaySeconds: 120
