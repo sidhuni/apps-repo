@@ -5,24 +5,26 @@ image: "docker.elastic.co/elasticsearch/elasticsearch"
 imageTag: "8.5.1"
 imagePullPolicy: "IfNotPresent"
 
-# Force single-node and disable memory lock (essential for Mac)
-extraEnvs:
+# 1. We use 'env' instead of 'extraEnvs' to try and force a cleaner override
+env:
   - name: "discovery.type"
     value: "single-node"
   - name: "bootstrap.memory_lock"
     value: "false"
 
-# This block is the 'Secret Sauce' that stops the Forbidden/Parse errors
+# 2. FORCE empty discovery to stop the chart's automatic 'help'
 cluster:
-  initial_master_nodes: [] 
+  initial_master_nodes: []
+  seed_hosts: []
 
+# 3. These must be null/empty
 replicas: 1
 minimumMasterNodes: null
 
-# Resource limits (Elastic 8 needs 2Gi to boot)
+# 4. Give the container enough RAM (Critical for 8.x)
 resources:
   requests:
-    cpu: "500m"
+    cpu: "1000m"
     memory: "2Gi"
   limits:
     cpu: "1000m"
@@ -30,18 +32,11 @@ resources:
 
 esJavaOpts: "-Xmx1g -Xms1g"
 
-# Using local storage for Rancher Desktop
-volumeClaimTemplate:
-  accessModes: [ "ReadWriteOnce" ]
-  resources:
-    requests:
-      storage: 5Gi
-
-# Disable the problematic init container
+# 5. Disable the failing init container
 sysctlInitContainer:
   enabled: false
 
-# Acceptance criteria for a 1-node setup
+# 6. Allow the single node to stay 'yellow'
 clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
 
 Probes: 
