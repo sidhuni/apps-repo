@@ -1,14 +1,15 @@
 replicas: 1
 
-# Helm chart roles (MUST be empty)
-roles: []
+roles:
+  - master
+  - data
+  - ingest
 
 esConfig:
   elasticsearch.yml: |
-    node.roles: []
     discovery.type: single-node
 
-minimumMasterNodes: 0
+esJavaOpts: "-Xms1g -Xmx1g"
 
 resources:
   requests:
