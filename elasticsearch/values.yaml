@@ -1,60 +1,46 @@
-clusterName: "elasticsearch"
-nodeGroup: "master"
-
-image: "docker.elastic.co/elasticsearch/elasticsearch"
-imageTag: "8.5.1"
-imagePullPolicy: "IfNotPresent"
-
-# --- THE RADICAL CHANGE ---
-# We force the container to run a specific command, bypassing 
-# the chart's automatic (and failing) environment setup.
-extraEnvs:
-  - name: "discovery.type"
-    value: "single-node"
-  - name: "xpack.security.enabled"
-    value: "true"
-  - name: "bootstrap.memory_lock"
-    value: "false"
-
-# Use these to 'kill' the chart's automatic discovery injection
+USER-SUPPLIED VALUES:
+Probes: null
 cluster:
   initial_master_nodes: []
   seed_hosts: []
-
-replicas: 1
-minimumMasterNodes: null
-
-# 2Gi is the 'magic number' for ES 8 to start without OOM (Out of Memory)
-resources:
-  requests:
-    cpu: "1000m"
-    memory: "2Gi"
-  limits:
-    cpu: "1000m"
-    memory: "2Gi"
-
-esJavaOpts: "-Xmx1g -Xms1g"
-
-# Disable everything that could fail on Mac
-sysctlInitContainer:
-  enabled: false
-volumeClaimTemplate:
-  accessModes: ["ReadWriteOnce"]
-  resources:
-    requests:
-      storage: 5Gi
-
-clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
-
-Probes: 
+clusterHealthCheckParams: wait_for_status=yellow&timeout=1s
+clusterName: elasticsearch
+esJavaOpts: -Xmx1g -Xms1g
+extraEnvs:
+- name: discovery.type
+  value: single-node
+- name: xpack.security.enabled
+  value: "true"
+- name: bootstrap.memory_lock
+  value: "false"
+image: docker.elastic.co/elasticsearch/elasticsearch
+imagePullPolicy: IfNotPresent
+imageTag: 8.5.1
 livenessProbe:
+  failureThreshold: 5
   initialDelaySeconds: 120
   periodSeconds: 60
   timeoutSeconds: 10
-  failureThreshold: 5
-
+minimumMasterNodes: null
+nodeGroup: master
 readinessProbe:
+  failureThreshold: 3
   initialDelaySeconds: 120
   periodSeconds: 60
   timeoutSeconds: 5
-  failureThreshold: 3
+replicas: 1
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 1000m
+    memory: 2Gi
+sysctlInitContainer:
+  enabled: false
+volumeClaimTemplate:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
