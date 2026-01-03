@@ -44,7 +44,6 @@ clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
 
 
 readinessProbe:
-  failureThreshold: 3
-  initialDelaySeconds: 120
-  periodSeconds: 60
-  timeoutSeconds: 5
+  initialDelaySeconds: 150 
+  periodSeconds: 20
+  failureThreshold: 10
