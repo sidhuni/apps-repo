@@ -1,24 +1,25 @@
 clusterName: "elasticsearch"
 nodeGroup: "master"
 
-# Use Official Elastic Image
 image: "docker.elastic.co/elasticsearch/elasticsearch"
 imageTag: "8.5.1"
 imagePullPolicy: "IfNotPresent"
 
-# --- THE CRITICAL FIXES ---
+# 1. This is the mandatory mode for 1-node clusters
 extraEnvs:
   - name: "discovery.type"
     value: "single-node"
 
-# Setting this to null stops the chart from injecting cluster.initial_master_nodes
-# which causes the 'Illegal Argument' / 'Parse' exceptions we saw.
+# 2. THE SECRET FIX: This prevents the Helm chart from 
+# injecting the problematic cluster.initial_master_nodes
+cluster:
+  initial_master_nodes: [] 
+
+# 3. Explicitly set to 1 and remove any other discovery settings
+replicas: 1
 minimumMasterNodes: null
 
-# Local dev should only be 1 replica for resource efficiency
-replicas: 1
-
-# Resource limits (Elastic 8.x needs 2Gi to initialize security successfully)
+# 4. Resources for Mac/Rancher stability
 resources:
   requests:
     cpu: "500m"
@@ -27,34 +28,15 @@ resources:
     cpu: "1000m"
     memory: "2Gi"
 
-# Give JVM half of the available memory
 esJavaOpts: "-Xmx1g -Xms1g"
 
-# Persistence settings for Rancher Desktop
-volumeClaimTemplate:
-  accessModes: ["ReadWriteOnce"]
-  resources:
-    requests:
-      storage: 5Gi
-
-# Enable security (Standard for 8.x)
-createCert: true
-
-# Service config
-service:
-  type: ClusterIP
-  httpPort: 9200
-
-# Disable the init container image pull and use the manual host fix
+# Disable the init container since we run it manually
 sysctlInitContainer:
   enabled: false
 
-# Acceptance criteria for a 1-node cluster
+# Accept 'yellow' health status
 clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
 
-# Patience for first-time boot (generating certs takes time on Mac)
 readinessProbe:
   initialDelaySeconds: 120
   periodSeconds: 60
-  successThreshold: 3
-  timeoutSeconds: 5
