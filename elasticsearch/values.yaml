@@ -21,14 +21,11 @@ antiAffinity: "soft"
 
 resources:
   requests:
-    memory: "512Mi"
+    memory: "1Gi"  # Elasticsearch 8.x struggles to boot on 512Mi
     cpu: "250m"
   limits:
-    memory: "1024Mi"
+    memory: "1.5Gi" # Gives breathing room for the OS/Filesystem cache
     cpu: "500m"
-
-# IMPORTANT: You must also lower the Java Heap to fit inside the new limits
-esJavaOpts: "-Xmx768m -Xms768m"
 
 # 4. STORAGE (Reduced from 30Gi to 5Gi for local testing)
 volumeClaimTemplate:
