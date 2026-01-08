@@ -1,8 +1,10 @@
 elasticsearchHosts: "https://elasticsearch-master:9200"
 
-# Secret References
+# TLS Configuration using your existing secret
 elasticsearchCertificateSecret: elasticsearch-master-certs
 elasticsearchCertificateAuthoritiesFile: ca.crt
+
+# Authentication using the secret you just updated
 elasticsearchCredentialSecret: elasticsearch-master-credentials
 
 replicas: 1
@@ -25,6 +27,8 @@ resources:
 
 protocol: https
 serverHost: "0.0.0.0"
+
+# Using /api/status for health reporting
 healthCheckPath: "/api/status"
 
 podSecurityContext:
@@ -37,7 +41,7 @@ securityContext:
   runAsNonRoot: true
   runAsUser: 1000
 
-# Service Account configuration
+# Required for the pre-install job to generate the service token
 serviceAccount: ""
 automountToken: true
 
