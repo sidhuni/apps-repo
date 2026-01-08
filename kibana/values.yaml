@@ -1,12 +1,10 @@
 elasticsearchHosts: "https://elasticsearch-master:9200"
 
-# Using the certs you already have
+# TLS Configuration using your existing secret
 elasticsearchCertificateSecret: elasticsearch-master-certs
 elasticsearchCertificateAuthoritiesFile: ca.crt
 
-# Let the Helm chart use the token it just created (as seen in your logs)
-# This replaces the manual 'elasticsearchCredentialSecret' for the first boot
-# if the pre-install job is being used.
+# Authentication using your existing secret
 elasticsearchCredentialSecret: elasticsearch-master-credentials
 
 replicas: 1
@@ -30,8 +28,8 @@ resources:
 protocol: https
 serverHost: "0.0.0.0"
 
-# Change this to "/" if the pod stays in "Health Missing"
-healthCheckPath: "/status" 
+# Using /api/status for faster health reporting in ArgoCD
+healthCheckPath: "/api/status"
 
 podSecurityContext:
   fsGroup: 1000
@@ -42,6 +40,10 @@ securityContext:
       - ALL
   runAsNonRoot: true
   runAsUser: 1000
+
+# Required for the pre-install job to create the service token
+serviceAccount: ""
+automountToken: true
 
 httpPort: 5601
 
