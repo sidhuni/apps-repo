@@ -10,7 +10,7 @@ elasticsearchCredentialSecret: kibana-token-secret
 
 # Disable automatic creation of Kibana service token
 elasticsearch:
-  createServiceToken: true
+  createServiceToken: ki-kibana-es-to
 
 
 # Elasticsearch TLS certificates (if needed)
