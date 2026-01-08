@@ -1,31 +1,38 @@
-elasticsearchURL: "" # "http://elasticsearch-master:9200"
-elasticsearchHosts: "http://elasticsearch-master:9200"
+elasticsearchHosts: "https://elasticsearch-master:9200"
+elasticsearchCertificateSecret: elasticsearch-master-certs
+elasticsearchCertificateAuthoritiesFile: ca.crt
+elasticsearchCredentialSecret: elasticsearch-master-credentials
 
 replicas: 1
 
-extraEnvs: []
+extraEnvs:
+  - name: "NODE_OPTIONS"
+    value: "--max-old-space-size=1800"
 
-# Mount Elasticsearch certs
+envFrom: []
+
+# Mount Elasticsearch certs inside Kibana
 secretMounts:
   - name: elasticsearch-master-certs
     secretName: elasticsearch-master-certs
     path: /usr/share/kibana/config/certs
-    subPath: ""  # optional, keep empty to mount the whole secret
+    subPath: "" # mounts entire secret folder
 
 image: "docker.elastic.co/kibana/kibana"
-imageTag: "7.5.1"
+imageTag: "8.5.1"
 imagePullPolicy: "IfNotPresent"
 
 labels: {}
+annotations: {}
 podAnnotations: {}
 
 resources:
   requests:
-    cpu: "100m"
-    memory: "500Mi"
+    cpu: "1000m"
+    memory: "2Gi"
   limits:
     cpu: "1000m"
-    memory: "1Gi"
+    memory: "2Gi"
 
 protocol: http
 serverHost: "0.0.0.0"
@@ -37,7 +44,7 @@ kibanaConfig:
     elasticsearch.hosts: ["https://elasticsearch-master:9200"]
     elasticsearch.ssl.certificateAuthorities: ["/usr/share/kibana/config/certs/ca.crt"]
     elasticsearch.username: "elastic"
-    elasticsearch.password: "DPdm08XcTbsZVsIk"
+    elasticsearch.password: "<from elasticsearch-master-credentials secret>"
 
 podSecurityContext:
   fsGroup: 1000
@@ -45,34 +52,43 @@ podSecurityContext:
 securityContext:
   capabilities:
     drop:
-    - ALL
+      - ALL
   runAsNonRoot: true
   runAsUser: 1000
 
 serviceAccount: ""
-
+automountToken: true
 priorityClassName: ""
 
 httpPort: 5601
-maxUnavailable: 1
+
+extraVolumes: []
+extraVolumeMounts: []
+extraContainers: []
+extraInitContainers: []
 
 updateStrategy:
   type: "Recreate"
 
 service:
   type: ClusterIP
+  loadBalancerIP: ""
   port: 5601
   nodePort: ""
   labels: {}
   annotations: {}
+  loadBalancerSourceRanges: []
+  httpPortName: http
 
 ingress:
   enabled: false
+  className: "nginx"
+  pathtype: ImplementationSpecific
   annotations: {}
-  path: /
   hosts:
-    - chart-example.local
-  tls: []
+    - host: kibana-example.local
+      paths:
+        - path: /
 
 readinessProbe:
   failureThreshold: 3
@@ -91,7 +107,7 @@ fullnameOverride: ""
 
 lifecycle: {}
 
-# --- Add a pre-install hook that waits for Elasticsearch certs ---
+# --- Optional pre-install hook to wait for Elasticsearch certs ---
 hooks:
   preInstall:
     - name: wait-for-elasticsearch-certs
@@ -112,3 +128,5 @@ hooks:
                       sleep 5
                     done
                     echo "Elasticsearch certs exist, continuing..."
+            # Make sure the Job is cleaned up after success
+            ttlSecondsAfterFinished: 60
