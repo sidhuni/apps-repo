@@ -1,6 +1,12 @@
 elasticsearchHosts: "https://elasticsearch-master:9200"
+
+# Using the certs you already have
 elasticsearchCertificateSecret: elasticsearch-master-certs
 elasticsearchCertificateAuthoritiesFile: ca.crt
+
+# Let the Helm chart use the token it just created (as seen in your logs)
+# This replaces the manual 'elasticsearchCredentialSecret' for the first boot
+# if the pre-install job is being used.
 elasticsearchCredentialSecret: elasticsearch-master-credentials
 
 replicas: 1
@@ -9,43 +15,23 @@ extraEnvs:
   - name: "NODE_OPTIONS"
     value: "--max-old-space-size=1800"
 
-envFrom: []
-
-# Mount Elasticsearch certs inside Kibana
-secretMounts:
-  - name: elasticsearch-master-certs
-    secretName: elasticsearch-master-certs
-    path: /usr/share/kibana/config/certs
-    subPath: "" # mounts entire secret folder
-
 image: "docker.elastic.co/kibana/kibana"
 imageTag: "8.5.1"
 imagePullPolicy: "IfNotPresent"
 
-labels: {}
-annotations: {}
-podAnnotations: {}
-
 resources:
   requests:
-    memory: "512Mi"
-    cpu: "250m"
+    cpu: "1000m"
+    memory: "2Gi"
   limits:
-    memory: "1024Mi"
-    cpu: "500m"
+    cpu: "1000m"
+    memory: "2Gi"
 
-
-protocol: http
+protocol: https
 serverHost: "0.0.0.0"
-healthCheckPath: "/app/kibana"
 
-kibanaConfig:
-  kibana.yml: |
-    server.host: "0.0.0.0"
-    elasticsearch.hosts: ["https://elasticsearch-master:9200"]
-    elasticsearch.ssl.certificateAuthorities: ["/usr/share/kibana/config/certs/ca.crt"]
-    elasticsearch.username: "elastic"
-    elasticsearch.password: "<from elasticsearch-master-credentials secret>"
+# Change this to "/" if the pod stays in "Health Missing"
+healthCheckPath: "/status" 
 
 podSecurityContext:
   fsGroup: 1000
@@ -57,54 +43,12 @@ securityContext:
   runAsNonRoot: true
   runAsUser: 1000
 
-serviceAccount: ""
-automountToken: true
-priorityClassName: ""
-
 httpPort: 5601
-
-extraVolumes: []
-extraVolumeMounts: []
-extraContainers: []
-extraInitContainers: []
-
-updateStrategy:
-  type: "Recreate"
 
 service:
   type: ClusterIP
-  loadBalancerIP: ""
   port: 5601
-  nodePort: ""
-  labels: {}
-  annotations: {}
-  loadBalancerSourceRanges: []
   httpPortName: http
 
-ingress:
-  enabled: false
-  className: "nginx"
-  pathtype: ImplementationSpecific
-  annotations: {}
-  hosts:
-    - host: kibana-example.local
-      paths:
-        - path: /
-
-readinessProbe:
-  failureThreshold: 3
-  initialDelaySeconds: 10
-  periodSeconds: 10
-  successThreshold: 3
-  timeoutSeconds: 5
-
-imagePullSecrets: []
-nodeSelector: {}
-tolerations: []
-affinity: {}
-
-nameOverride: ""
-fullnameOverride: ""
-
-lifecycle: {}
-
+updateStrategy:
+  type: "Recreate"
