@@ -197,7 +197,7 @@ readinessProbe:
   successThreshold: 3
   timeoutSeconds: 5
 
-clusterHealthCheckParams: "wait_for_status=green&timeout=1s"
+clusterHealthCheckParams: "wait_for_status=green&timeout=30s"
 
 
 schedulerName: ""
