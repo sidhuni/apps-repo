@@ -18,7 +18,7 @@ spec:
     ref: values
   destination:
     server: https://kubernetes.default.svc
-    namespace: kib
+    namespace: elastic
   syncPolicy:
     automated:
       prune: true
