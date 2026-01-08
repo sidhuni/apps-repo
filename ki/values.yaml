@@ -1,37 +1,27 @@
-# Kibana Helm values.yaml - corrected for Elasticsearch token auth
+# ==========================
+# Kibana Values
+# ==========================
 
+# Elasticsearch connection
 elasticsearchHosts: "https://elasticsearch-master:9200"
-protocol: https
 
-# Secret that contains CA cert for Elasticsearch TLS
+# Secret containing the username/password for Kibana to connect to Elasticsearch
+elasticsearchCredentialSecret: kibana-token-secret
+
+# Disable automatic creation of Kibana service token
+createKibanaServiceToken: false
+
+# Elasticsearch TLS certificates (if needed)
 elasticsearchCertificateSecret: elasticsearch-master-certs
 elasticsearchCertificateAuthoritiesFile: ca.crt
 
-# Secret that contains Kibana service token
-# The secret should have keys: username=elastic, password=<ki-kibana-token>
-elasticsearchCredentialSecret: kibana-token-secret
-
+# Kibana deployment
 replicas: 1
-
-extraEnvs:
-  - name: "NODE_OPTIONS"
-    value: "--max-old-space-size=1800"
-
-envFrom: []
-
-secretMounts: []
-
-hostAliases: []
-
 image: "docker.elastic.co/kibana/kibana"
 imageTag: "8.5.1"
 imagePullPolicy: "IfNotPresent"
 
-labels: {}
-annotations: {}
-
-podAnnotations: {}
-
+# Resources
 resources:
   requests:
     memory: "512Mi"
@@ -40,11 +30,17 @@ resources:
     memory: "1024Mi"
     cpu: "500m"
 
+# Server host and HTTP port
 serverHost: "0.0.0.0"
-healthCheckPath: "/app/kibana"
+protocol: http
+httpPort: 5601
 
-kibanaConfig: {}
+# Extra environment variables
+extraEnvs:
+  - name: "NODE_OPTIONS"
+    value: "--max-old-space-size=1800"
 
+# Security context
 podSecurityContext:
   fsGroup: 1000
 
@@ -55,53 +51,27 @@ securityContext:
   runAsNonRoot: true
   runAsUser: 1000
 
-serviceAccount: ""
-automountToken: false
-
-priorityClassName: ""
-
-httpPort: 5601
-
-extraVolumes: []
-extraVolumeMounts: []
-
-extraContainers: []
-extraInitContainers: []
-
-updateStrategy:
-  type: "Recreate"
-
+# Service configuration
 service:
   type: ClusterIP
   port: 5601
+  nodePort: ""
   labels: {}
   annotations: {}
-  loadBalancerSourceRanges: []
-  httpPortName: http
 
+# Ingress (optional)
 ingress:
   enabled: false
   className: "nginx"
-  pathtype: ImplementationSpecific
-  annotations: {}
   hosts:
     - host: kibana-example.local
       paths:
         - path: /
 
+# Probes
 readinessProbe:
   failureThreshold: 3
   initialDelaySeconds: 10
   periodSeconds: 10
   successThreshold: 3
   timeoutSeconds: 5
-
-imagePullSecrets: []
-nodeSelector: {}
-tolerations: []
-affinity: {}
-
-nameOverride: ""
-fullnameOverride: ""
-
-lifecycle: {}
