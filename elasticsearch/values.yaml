@@ -67,8 +67,8 @@ resources:
     cpu: "1000m"
     memory: "2Gi"
   limits:
-    cpu: "1000m"
-    memory: "2Gi"
+    cpu: "2000m"
+    memory: "4Gi"
 
 initResources: {}
 
@@ -185,7 +185,7 @@ sysctlVmMaxMapCount: 262144
 livenessProbe:
   initialDelaySeconds: 5
   periodSeconds: 10
-  timeoutSeconds: 1
+  timeoutSeconds: 5
   successThreshold: 1
   failureThreshold: 3
 
