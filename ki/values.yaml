@@ -11,6 +11,10 @@ elasticsearchServiceAccountToken:
   secretName: kibana-kibana-es-token
   secretKey: token
 
+preInstallJob:
+  enabled: false
+
+
 # Do NOT use elastic user
 elasticsearchUsername: ""
 elasticsearchPassword: ""
