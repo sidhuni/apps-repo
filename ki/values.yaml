@@ -6,26 +6,48 @@ elasticsearchCredentialSecret: elasticsearch-master-credentials
 
 replicas: 1
 
+# Extra environment variables to append to this nodeGroup
+# This will be appended to the current 'env:' key. You can use any of the kubernetes env
+# syntax here
 extraEnvs:
   - name: "NODE_OPTIONS"
     value: "--max-old-space-size=1800"
+#  - name: MY_ENVIRONMENT_VAR
+#    value: the_value_goes_here
 
+# Allows you to load environment variables from kubernetes secret or config map
 envFrom: []
+# - secretRef:
+#     name: env-secret
+# - configMapRef:
+#     name: config-map
 
-secretMounts:
-  - name: elastic-ca
-    secretName: elasticsearch-master-certs
-    path: /usr/share/kibana/config/certs
+# A list of secrets and their paths to mount inside the pod
+# This is useful for mounting certificates for security and for mounting
+# the X-Pack license
+secretMounts: []
+#  - name: kibana-keystore
+#    secretName: kibana-keystore
+#    path: /usr/share/kibana/data/kibana.keystore
+#    subPath: kibana.keystore # optional
 
 hostAliases: []
+#- ip: "127.0.0.1"
+#  hostnames:
+#  - "foo.local"
+#  - "bar.local"
 
 image: "docker.elastic.co/kibana/kibana"
 imageTag: "8.5.1"
 imagePullPolicy: "IfNotPresent"
 
+# additionals labels
 labels: {}
+
 annotations: {}
+
 podAnnotations: {}
+# iam.amazonaws.com/role: es-cluster
 
 resources:
   requests:
@@ -36,15 +58,19 @@ resources:
     memory: "2Gi"
 
 protocol: http
+
 serverHost: "0.0.0.0"
+
 healthCheckPath: "/app/kibana"
 
-kibanaConfig:
-  kibana.yml: |
-    server.name: kibana
-    server.host: "0.0.0.0"
-    elasticsearch.ssl.verificationMode: certificate
-    monitoring.ui.container.elasticsearch.enabled: true
+# Allows you to add any config files in /usr/share/kibana/config/
+# such as kibana.yml
+kibanaConfig: {}
+#   kibana.yml: |
+#     key:
+#       nestedkey: value
+
+# If Pod Security Policy in use it may be required to specify security context as well as service account
 
 podSecurityContext:
   fsGroup: 1000
@@ -53,21 +79,42 @@ securityContext:
   capabilities:
     drop:
       - ALL
+  # readOnlyRootFilesystem: true
   runAsNonRoot: true
   runAsUser: 1000
 
 serviceAccount: ""
+
+# Whether or not to automount the service account token in the pod. Normally, Kibana does not need this
 automountToken: true
 
+# This is the PriorityClass settings as defined in
+# https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
 priorityClassName: ""
 
 httpPort: 5601
 
-extraVolumes: []
-extraVolumeMounts: []
+extraVolumes:
+  []
+  # - name: extras
+  #   emptyDir: {}
+
+extraVolumeMounts:
+  []
+  # - name: extras
+  #   mountPath: /usr/share/extras
+  #   readOnly: true
+  #
 
 extraContainers: []
+# - name: dummy-init
+#   image: busybox
+#   command: ['echo', 'hey']
+
 extraInitContainers: []
+# - name: dummy-init
+#   image: busybox
+#   command: ['echo', 'hey']
 
 updateStrategy:
   type: "Recreate"
@@ -79,7 +126,13 @@ service:
   nodePort: ""
   labels: {}
   annotations: {}
+  # cloud.google.com/load-balancer-type: "Internal"
+  # service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
+  # service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+  # service.beta.kubernetes.io/openstack-internal-load-balancer: "true"
+  # service.beta.kubernetes.io/cce-load-balancer-internal-vpc: "true"
   loadBalancerSourceRanges: []
+  # 0.0.0.0/0
   httpPortName: http
 
 ingress:
@@ -87,10 +140,16 @@ ingress:
   className: "nginx"
   pathtype: ImplementationSpecific
   annotations: {}
+  # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
   hosts:
     - host: kibana-example.local
       paths:
         - path: /
+  #tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
 
 readinessProbe:
   failureThreshold: 3
@@ -107,30 +166,10 @@ affinity: {}
 nameOverride: ""
 fullnameOverride: ""
 
-# Lifecycle hook to import dashboards after container starts (optional)
-lifecycle:
-  postStart:
-    exec:
-      command:
-        - bash
-        - -c
-        - |
-          KB_URL=http://localhost:5601
-          until [[ "$(curl -s -o /dev/null -w '%{http_code}' $KB_URL)" == "200" ]]; do sleep 1; done
-          curl -XPOST "$KB_URL/api/kibana/dashboards/import" \
-               -H "Content-Type: application/json" \
-               -H "kbn-xsrf: true" \
-               -d '{"objects":[{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}},{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}]}'
-
-# ✅ Use EXISTING Kibana service account token (from your secret)
-elasticsearchServiceAccountToken:
-  secretName: kibana-kibana-es-token
-  secretKey: token
-
-# 🚫 Do NOT use elastic user
-elasticsearchUsername: ""
-elasticsearchPassword: ""
-
-preInstallJob:
-  enabled: false
-
+lifecycle: {}
+# preStop:
+#   exec:
+#     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
+# postStart:
+#   exec:
+#     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
