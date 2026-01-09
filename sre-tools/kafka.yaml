@@ -76,3 +76,7 @@ spec:
       kind: StatefulSet
       jsonPointers:
         - /spec/volumeClaimTemplates # <--- This fixes your current error
+
+        fdv,rfv,rv
+        efverf
+        
