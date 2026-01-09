@@ -1,25 +1,21 @@
 replicas: 1
 
-image:
-  repository: docker.elastic.co/kibana/kibana
-  tag: "8.5.1"   # must match your Elasticsearch version
-  pullPolicy: IfNotPresent
+image: docker.elastic.co/kibana/kibana
+imageTag: "8.5.1"
+imagePullPolicy: IfNotPresent
 
 elasticsearchHosts: "https://elasticsearch-master:9200"
 
-# Use EXISTING service account token secret
 elasticsearchServiceAccountToken:
   secretName: kibana-kibana-es-token
   secretKey: token
 
-# TLS configuration (important)
 elasticsearchSSL:
   enabled: true
   certificateAuthorities:
     - /usr/share/kibana/config/certs/ca.crt
   verificationMode: certificate
 
-# Mount Elasticsearch CA cert
 secretMounts:
   - name: elastic-ca
     secretName: elasticsearch-master-certs
@@ -34,29 +30,12 @@ kibanaConfig:
 
 resources:
   requests:
-    cpu: "250m"
-    memory: "512Mi"
+    cpu: 250m
+    memory: 512Mi
   limits:
-    cpu: "500m"
-    memory: "1Gi"
+    cpu: 500m
+    memory: 1Gi
 
 service:
   type: ClusterIP
   port: 5601
-
-ingress:
-  enabled: false
-
-readinessProbe:
-  httpGet:
-    path: /login
-    port: 5601
-  initialDelaySeconds: 20
-  periodSeconds: 10
-
-livenessProbe:
-  httpGet:
-    path: /login
-    port: 5601
-  initialDelaySeconds: 60
-  periodSeconds: 20
