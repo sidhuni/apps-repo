@@ -11,6 +11,10 @@ elasticsearch:
   serviceAccountToken:
     create: false
 
+preInstallJob:
+  enabled: false
+
+
 # ✅ Use EXISTING token
 elasticsearchServiceAccountToken:
   secretName: kibana-kibana-es-token
