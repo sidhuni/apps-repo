@@ -130,3 +130,7 @@ elasticsearchServiceAccountToken:
 # 🚫 Do NOT use elastic user
 elasticsearchUsername: ""
 elasticsearchPassword: ""
+
+preInstallJob:
+  enabled: false
+
