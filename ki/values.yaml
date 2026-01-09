@@ -173,3 +173,13 @@ lifecycle: {}
 # postStart:
 #   exec:
 #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
+
+preInstallJob:
+  enabled: false
+
+elasticsearchServiceAccountToken:
+  secretName: kibana-kibana-es-token
+  secretKey: token
+
+elasticsearchUsername: ""
+elasticsearchPassword: ""
