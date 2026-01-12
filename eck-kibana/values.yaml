@@ -18,3 +18,9 @@ labels: {}
 monitoring: {}
 secureSettings: []
 version: 9.2.0
+readinessProbe:
+  failureThreshold: 3
+  initialDelaySeconds: 120
+  periodSeconds: 60
+  successThreshold: 3
+  timeoutSeconds: 5
