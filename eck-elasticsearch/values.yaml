@@ -205,9 +205,9 @@ nodeSets:
 
         # List of environment variables to set in the 'elasticsearch' container.
         # https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
-        env:
-          - name: ES_JAVA_OPTS
-            value: "-Xms1g -Xmx1g"
+        # env:
+        # - name: "my-env-var"
+        #   value: "my-value"
 
         # Compute Resources required by this container.
         resources:
@@ -216,10 +216,10 @@ nodeSets:
           #
           # Defaults used by the ECK Operator, if not specified, are below
           limits:
-            cpu: 1
-            memory: 1Gi
+            # cpu: 1
+            memory: 2Gi
           requests:
-            cpu: 1
+            # cpu: 1
             memory: 2Gi
 
           # Example increasing both the requests and limits values:
@@ -393,12 +393,8 @@ ingress:
     # secretName: chart-example-tls
 
 readinessProbe:
-  exec:
-    command:
-      - bash
-      - -c
-      - /mnt/elastic-internal/scripts/readiness-port-script.sh
-  initialDelaySeconds: 150
-  timeoutSeconds: 60
-  periodSeconds: 10
-  failureThreshold: 6
+  failureThreshold: 3
+  initialDelaySeconds: 120
+  periodSeconds: 60
+  successThreshold: 3
+  timeoutSeconds: 5
