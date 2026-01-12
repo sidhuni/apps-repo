@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: eck-operator
+  name: eck-elasticsearch
   namespace: argocd
 spec:
   project: default
