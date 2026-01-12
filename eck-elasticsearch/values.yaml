@@ -398,7 +398,7 @@ readinessProbe:
       - bash
       - -c
       - /mnt/elastic-internal/scripts/readiness-port-script.sh
-  initialDelaySeconds: 40
-  timeoutSeconds: 10
+  initialDelaySeconds: 150
+  timeoutSeconds: 60
   periodSeconds: 10
-  failureThreshold: 5
+  failureThreshold: 6
