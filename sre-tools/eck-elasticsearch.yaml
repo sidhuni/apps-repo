@@ -1,17 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: elasticsearch
+  name: eck-elasticsearch
   namespace: argocd
 spec:
   project: default
+
   source:
-    repoURL: 'https://github.com/sidhuni/tools-app.git'
+    repoURL: 'https://github.com/sidhuni/tools-app.git'  # your repo
     targetRevision: main
-    path: elasticsearch # directory containing the CR YAML(s)
+    path: sre-tools       # folder containing the actual CR manifests
+    directory:
+      recurse: true       # recursively include subfolders if needed
+
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: elastic
+    namespace: eck-elasticsearch   # namespace where Elasticsearch will live
+
   syncPolicy:
     automated:
       prune: true
@@ -19,6 +24,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - SkipDryRunOnMissingResource=true
+
   ignoreDifferences:
     - group: ""
       kind: Secret
