@@ -18,10 +18,9 @@
 
 # Version of Kibana.
 #
-image:
-  repository: docker.elastic.co/kibana/kibana
-  tag: 9.2.0
-  pullPolicy: IfNotPresent
+version: 9.2.0
+image: "docker.elastic.co/kibana/kibana:9.2.0"
+
 
 
 
