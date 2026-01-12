@@ -217,10 +217,10 @@ nodeSets:
           # Defaults used by the ECK Operator, if not specified, are below
           limits:
             # cpu: 1
-            memory: 2Gi
+            memory: 1Gi
           requests:
             # cpu: 1
-            memory: 2Gi
+            memory: 1Gi
 
           # Example increasing both the requests and limits values:
           # limits:
