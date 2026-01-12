@@ -1,19 +1,24 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: eck-elasticsearch
+  name: eck-operator
   namespace: argocd
 spec:
   project: default
-
-  source:
-    repoURL: 'https://github.com/sidhuni/tools-app.git'
+  sources:
+  - repoURL: 'https://helm.elastic.co'
+    targetRevision: 0.17.0
+    chart: eck-elasticsearch
+    helm:
+      valueFiles:
+      - $values/eck-elasticsearch/values.yaml
+  - repoURL: https://github.com/sidhuni/tools-app.git
     targetRevision: main
-    path: eck-elasticsearch   # folder containing elasticsearch.yaml (CRD manifest)
+    ref: values
 
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: eck-elasticsearch
+    namespace: eck-operator
 
   syncPolicy:
     automated:
@@ -22,13 +27,3 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - SkipDryRunOnMissingResource=true
-
-  ignoreDifferences:
-    - group: ""
-      kind: Secret
-      jsonPointers:
-        - /metadata/creationTimestamp
-        - /metadata/uid
-        - /metadata/resourceVersion
-        - /metadata/managedFields
-        - /data
