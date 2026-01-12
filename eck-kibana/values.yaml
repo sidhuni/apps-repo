@@ -68,7 +68,18 @@ config: null
 # PodTemplate provides customisation options (labels, annotations, affinity rules,
 # resource requests, and so on) for the Kibana pods
 #
-# podTemplate:
+podTemplate:
+  spec:
+    containers:
+      - name: kibana
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 1
+            memory: 2Gi
+
 
 # Number of revisions to retain to allow rollback in the underlying deployment.
 # By default, if not set, Kubernetes sets 10.
