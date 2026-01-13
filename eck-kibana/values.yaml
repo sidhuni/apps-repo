@@ -13,8 +13,11 @@ ingress:
     path: /
   labels: {}
   pathType: Prefix
-  tls:
-    enabled: false
+spec:
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
 labels: {}
 monitoring: {}
 secureSettings: []
