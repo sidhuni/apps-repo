@@ -36,7 +36,8 @@ ingress:
   hosts:
     - host: chart-example.local
       path: /
-
+  tls:
+    enabled: false
 spec:
   nodeSets:
   - name: default
@@ -57,7 +58,3 @@ spec:
           env:
           - name: READINESS_PROBE_TIMEOUT
             value: "10"
-  http:
-    tls:
-      selfSignedCertificate:
-        disabled: true
