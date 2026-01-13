@@ -11,6 +11,7 @@ updateStrategy: {}
 remoteClusters: {}
 remoteClusterServer: {}
 volumeClaimDeletePolicy: ''
+
 nodeSets:
   - name: default
     count: 1
@@ -37,14 +38,23 @@ ingress:
       path: /
   tls:
     enabled: false
-readinessProbe:
-  exec:
-    command:
-      - bash
-      - '-c'
-      - /mnt/elastic-internal/scripts/readiness-probe-script.sh
-  failureThreshold: 5
-  initialDelaySeconds: 120
-  periodSeconds: 60
-  successThreshold: 1
-  timeoutSeconds: 10
+spec:
+  nodeSets:
+  - name: default
+    podTemplate:
+      spec:
+        containers:
+        - name: elasticsearch
+          readinessProbe:
+            exec:
+              command:
+              - bash
+              - -c
+              - /mnt/elastic-internal/scripts/readiness-probe-script.sh
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 12
+            timeoutSeconds: 12
+          env:
+          - name: READINESS_PROBE_TIMEOUT
+            value: "10"
