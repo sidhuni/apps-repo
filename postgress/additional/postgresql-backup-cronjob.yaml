@@ -14,7 +14,7 @@ spec:
           containers:
           - name: backup
             # Use this specific tag to avoid the ImagePullBackOff error
-            image: bitnami/postgresql:16
+            image: bitnami/postgresql:18
             env:
               - name: PGPASSWORD
                 valueFrom:
