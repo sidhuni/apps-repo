@@ -5,7 +5,7 @@ auth:
   username: admin
   database: chms
 
-  existingSecret: postgresql-secret
+  existingSecret: ""
   secretKeys:
     adminPasswordKey: postgres-password
     userPasswordKey: password
