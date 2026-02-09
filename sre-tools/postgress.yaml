@@ -16,6 +16,10 @@ spec:
     targetRevision: main
     ref: values
 
+  - repoURL: https://github.com/sidhuni/tools-app.git
+    targetRevision: main
+    path: postgress/postgresql-backup-cronjob
+
   destination:
     server: "https://kubernetes.default.svc"
     namespace: postgresql
