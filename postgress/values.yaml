@@ -19,7 +19,7 @@ primary:
 
   persistence:
     enabled: true
-    storageClass: "gp3"
+    storageClass: "standrad"
     accessModes:
       - ReadWriteOnce
     size: 10Gi
