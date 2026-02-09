@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   sources:
-  - repoURL: 'https://charts.bitnami.com/bitnami'
+  - repoURL: 'registry-1.docker.io/bitnamicharts'
     targetRevision: 18.2.4
     chart: postgresql
     helm:
