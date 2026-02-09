@@ -37,3 +37,7 @@ readReplicas:
   name: read
   replicaCount: 1
 
+persistentVolumeClaimRetentionPolicy:
+  enabled: false
+  whenScaled: Retain
+  whenDeleted: Retain
