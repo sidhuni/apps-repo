@@ -4,7 +4,7 @@ metadata:
   name: postgresql-backup
   namespace: postgresql
 spec:
-  schedule: "0 2 * * *"  # daily at 2:00 AM
+  schedule: "0 2 * * *" 
   jobTemplate:
     spec:
       template:
@@ -22,18 +22,13 @@ spec:
               - /bin/sh
               - -c
               - |
-                BACKUP_DIR=/backups
-                mkdir -p $BACKUP_DIR
-                FILENAME="$BACKUP_DIR/backup-$(date +\%F).sql"
-                echo "Starting backup: $FILENAME"
+                # Use /tmp for local testing so we don't touch the DB disk
+                FILENAME="/tmp/backup-$(date +%F).sql"
+                echo "Starting backup to $FILENAME..."
                 pg_dump -h postgresql -U admin chms > $FILENAME
-                echo "Backup done, cleaning old backups..."
-                ls -1t $BACKUP_DIR/*.sql | tail -n +6 | xargs -r rm
-            volumeMounts:
-              - name: backup-volume
-                mountPath: /backups
+                echo "Backup size: $(du -sh $FILENAME)"
+                # Local cleanup logic (keeps last 5 files in /tmp)
+                ls -1t /tmp/backup-*.sql | tail -n +6 | xargs -r rm
+                echo "Cleanup complete."
           restartPolicy: OnFailure
-          volumes:
-            - name: backup-volume
-              persistentVolumeClaim:
-                claimName: data-postgresql-0  # reuse your PVC
+          # No volumes needed for a simple local test to /tmp
