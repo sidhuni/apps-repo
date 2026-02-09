@@ -4,7 +4,6 @@ metadata:
   name: postgresql-backup
   namespace: postgresql
 spec:
-  # This runs every 5 minutes automatically
   schedule: "*/1 * * * *" 
   concurrencyPolicy: Forbid
   jobTemplate:
@@ -21,12 +20,30 @@ spec:
                   secretKeyRef:
                     name: postgresql
                     key: postgres-password
+            volumeMounts:
+            - name: backup-storage
+              mountPath: /backups
             command:
               - /bin/sh
               - -c
               - |
-                echo "Automatic Backup Started at $(date)"
-                # -h postgresql matches your fullnameOverride
-                pg_dump -h postgresql -U postgres chms > /tmp/backup.sql
-                echo "Backup Success. Size: $(du -sh /tmp/backup.sql)"
+                set -e
+                BACKUP_DIR="/backups"
+                TIMESTAMP=$(date +%Y%m%d%H%M)
+                FILE_NAME="$BACKUP_DIR/backup-$TIMESTAMP.sql"
+
+                echo "Starting Backup: $FILE_NAME"
+                pg_dump -h postgresql -U postgres chms > "$FILE_NAME"
+                
+                echo "Backup Complete. Rotating old files..."
+                # Keep only the 5 most recent .sql files
+                cd $BACKUP_DIR
+                ls -tp *.sql | grep -v '/$' | tail -n +6 | xargs -I {} rm -- {}
+                
+                echo "Current backups in storage:"
+                ls -lh $BACKUP_DIR
           restartPolicy: OnFailure
+          volumes:
+          - name: backup-storage
+            persistentVolumeClaim:
+              claimName: postgresql-backup-pvc # Make sure this PVC exists!
