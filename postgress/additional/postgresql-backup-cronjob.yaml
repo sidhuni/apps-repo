@@ -4,14 +4,17 @@ metadata:
   name: postgresql-backup
   namespace: postgresql
 spec:
-  schedule: "*/1 * * * *" # Runs every 5 mins for testing
+  # This runs every 5 minutes automatically
+  schedule: "*/1 * * * *" 
+  concurrencyPolicy: Forbid
   jobTemplate:
     spec:
       template:
         spec:
           containers:
           - name: backup
-            image: bitnami/postgresql:16
+            # Use this specific tag to avoid the ImagePullBackOff error
+            image: docker.io/bitnami/postgresql:16.4.0-debian-12-r11
             env:
               - name: PGPASSWORD
                 valueFrom:
@@ -22,14 +25,8 @@ spec:
               - /bin/sh
               - -c
               - |
-                echo "Starting backup..."
-                pg_dump -h postgresql -U admin chms > /backups/local-test.sql
-                echo "Backup finished. Size: $(du -sh /backups/local-test.sql)"
-                sleep 300 # Keeps pod alive for 5 mins so you can inspect it
-            volumeMounts:
-              - name: temp-storage
-                mountPath: /backups
-          volumes:
-            - name: temp-storage
-              emptyDir: {}
+                echo "Automatic Backup Started at $(date)"
+                # -h postgresql matches your fullnameOverride
+                pg_dump -h postgresql -U admin chms > /tmp/backup.sql
+                echo "Backup Success. Size: $(du -sh /tmp/backup.sql)"
           restartPolicy: OnFailure
