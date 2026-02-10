@@ -1,10 +1,9 @@
 fullnameOverride: postgresql
 
 auth:
-  enablePostgresUser: true      # enable postgres superuser (needed for backup/restore)
-  postgresPassword: NewSuperSecret123!
-  username: admin               # your application user
-  database: chms                # default DB to create
+  enablePostgresUser: true      
+  username: admin               
+  database: chms                
 
   # Map secret keys properly
   secretKeys:
@@ -54,25 +53,3 @@ extraObjects:
       resources:
         requests:
           storage: 5Gi
-
-# NEW SECTION: dedicated backup user
-extraInitScripts:
-  - name: create-backup-user.sql
-    script: |
-      -- Create a read-only backup user (SRE-safe)
-      DO
-      $do$
-      BEGIN
-        IF NOT EXISTS (
-          SELECT FROM pg_catalog.pg_roles WHERE rolname = 'backup_user'
-        ) THEN
-          CREATE ROLE backup_user WITH LOGIN PASSWORD 'BackupPass123!';
-        END IF;
-      END
-      $do$;
-
-      -- Grant minimal permissions for backup
-      GRANT CONNECT ON DATABASE chms TO backup_user;
-      GRANT USAGE ON SCHEMA public TO backup_user;
-      GRANT SELECT ON ALL TABLES IN SCHEMA public TO backup_user;
-      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO backup_user;
