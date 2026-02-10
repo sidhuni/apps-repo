@@ -1,9 +1,10 @@
 fullnameOverride: postgresql
 
 auth:
-  enablePostgresUser: true      
-  username: admin               
-  database: chms                
+  enablePostgresUser: true
+  username: admin
+  password: MyStrongPassword123    # ✅ fixed password for predictable backups
+  database: chms
 
 architecture: standalone
 
@@ -12,14 +13,14 @@ primary:
 
   persistence:
     enabled: true
-    storageClass: local-path     # 🔥 important: ensures PVC uses local path
+    storageClass: local-path
     accessModes:
       - ReadWriteOnce
     size: 8Gi
     mountPath: /bitnami/postgresql
 
   service:
-    type: NodePort               # OK for local testing
+    type: NodePort
 
   networkPolicy:
     enabled: false
@@ -27,14 +28,12 @@ primary:
   pdb:
     create: false
 
-# Disable read replicas for local setup
 readReplicas:
   replicaCount: 0
 
 persistentVolumeClaimRetentionPolicy:
   enabled: true
 
-# Create PVC for storing backups
 extraObjects:
   - apiVersion: v1
     kind: PersistentVolumeClaim
