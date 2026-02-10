@@ -4,7 +4,7 @@ metadata:
   name: postgresql-backup
   namespace: postgresql
 spec:
-  schedule: "*/1 * * * *"  # every minute for testing
+  schedule: "0 2 * * *"   # daily at 2 AM
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
@@ -18,12 +18,15 @@ spec:
               image: postgres:16
               env:
                 - name: PGUSER
-                  value: admin
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-backup-creds
+                      key: PGUSER
                 - name: PGPASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: postgresql   # use your existing secret
-                      key: password
+                      name: postgres-backup-creds
+                      key: PGPASSWORD
               volumeMounts:
                 - name: backup-storage
                   mountPath: /backups
@@ -32,7 +35,6 @@ spec:
                 - -c
                 - |
                   set -e
-
                   echo "Automatic Backup Started at $(date -u)"
 
                   DATE=$(date +%Y-%m-%d)
