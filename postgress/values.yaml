@@ -4,8 +4,7 @@ auth:
   enablePostgresUser: true
   username: admin
   database: chms
-
-  existingSecret: "postgresql-secrets"
+  existingSecret: "postgresql-secrets" # We will create this manually
   secretKeys:
     adminPasswordKey: postgres_password
     userPasswordKey: user_password
@@ -18,12 +17,8 @@ primary:
     storageClass: local-path
     size: 8Gi
     mountPath: /bitnami/postgresql
-
   service:
     type: NodePort
 
 readReplicas:
   replicaCount: 0
-
-persistentVolumeClaimRetentionPolicy:
-  enabled: true
