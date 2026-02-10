@@ -5,10 +5,12 @@ auth:
   database: chms
   existingSecret: postgresql
   secretKeys:
-    # Map both to ensure the container finds a valid password
+    # Key for the 'admin' user
     adminPasswordKey: password
-    postgresPasswordKey: postgres-password 
-    replicationPasswordKey: postgres-password       # ignored because existingSecret is set
+    # Key for the 'postgres' (superuser) 
+    postgresPasswordKey: postgres-password
+    # Key for replication
+    replicationPasswordKey: postgres-password
 
 
 architecture: standalone
