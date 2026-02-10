@@ -4,7 +4,7 @@ metadata:
   name: postgresql-local-backup
   namespace: postgresql
 spec:
-  schedule: "*/1 * * * *" # Running every minute for your test
+  schedule: "*/1 * * * *" 
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
@@ -30,31 +30,19 @@ spec:
                 DATE_FOLDER=$(date +%Y-%m-%d)
                 TARGET_DIR="/backups/$DATE_FOLDER"
                 mkdir -p "$TARGET_DIR"
-
-                echo "--- Starting Global Discovery Backup ---"
-
-                # 1. This command 'asks' Postgres for all database names
-                # It excludes only 'postgres' and templates to avoid system junk
+                
+                # Dynamic discovery of all DBs (Grafana, Temporal, etc.)
                 DB_LIST=$(psql -h postgresql -U postgres -At -c "SELECT datname FROM pg_database WHERE datistemplate = false AND datname != 'postgres';")
-
+                
                 for DB in $DB_LIST; do
-                  echo "Found Database: $DB. Starting backup..."
-                  
-                  # 2. Back up each database found into the dated folder
-                  if pg_dump -h postgresql -U postgres "$DB" > "$TARGET_DIR/$DB.sql"; then
-                    echo "  [SUCCESS] Saved $DB.sql"
-                  else
-                    echo "  [ERROR] Failed to backup $DB"
-                  fi
+                  echo "Backing up: $DB"
+                  pg_dump -h postgresql -U postgres "$DB" > "$TARGET_DIR/$DB.sql"
                 done
-
-                # 3. Cleanup: Keep only the 5 most recent folders
-                echo "Rotating local storage..."
+                
+                # Keep last 5 days
                 cd /backups && ls -dt */ | tail -n +6 | xargs -I {} rm -rf "{}"
-                
-                echo "--- All Discoverable Databases Backed Up ---"
-                ls -R /backups/$DATE_FOLDER
-                
+          # 🔥 THIS LINE MUST BE AT THIS INDENTATION LEVEL (under spec.jobTemplate.spec.template.spec)
+          restartPolicy: OnFailure
           volumes:
           - name: backup-dir
             persistentVolumeClaim:
