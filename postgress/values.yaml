@@ -27,3 +27,16 @@ readReplicas:
 
 persistentVolumeClaimRetentionPolicy:
   enabled: true
+
+primary:
+  extraVolumes:
+    - name: secrets-store-inline
+      csi:
+        driver: secrets-store.csi.k8s.io
+        readOnly: true
+        volumeAttributes:
+          secretProviderClass: "postgresql-secrets"
+  extraVolumeMounts:
+    - name: secrets-store-inline
+      mountPath: "/mnt/secrets-store"
+      readOnly: true
