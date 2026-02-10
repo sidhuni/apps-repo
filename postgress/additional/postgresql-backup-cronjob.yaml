@@ -27,9 +27,7 @@ spec:
                     secretKeyRef:
                       name: postgres-backup-creds
                       key: PGPASSWORD
-              volumeMounts:
-                - name: backup-storage
-                  mountPath: /backups
+              
               command:
                 - /bin/sh
                 - -c
