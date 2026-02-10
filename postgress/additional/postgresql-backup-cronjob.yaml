@@ -23,6 +23,7 @@ spec:
             - name: backup-dir
               mountPath: /backups
             command:
+              command:
               - /bin/sh
               - -c
               - |
@@ -31,25 +32,33 @@ spec:
                 TARGET_DIR="/backups/$DATE_FOLDER"
                 mkdir -p "$TARGET_DIR"
 
-                echo "--- Starting Local Multi-DB Backup: $DATE_FOLDER ---"
+                echo "--- Starting Local Backup: $DATE_FOLDER ---"
+                
+                # Use 'postgres' as the host if that is your service name
+                HOST="postgresql" 
+                USER="postgres"
 
-                # 1. Get all DB names (Grafana, Temporal, Uni, etc.)
-                DB_LIST=$(psql -h postgresql -U postgres -At -c "SELECT datname FROM pg_database WHERE datistemplate = false AND datname != 'postgres';")
+                # 1. Test Connection first
+                if ! psql -h $HOST -U $USER -c "SELECT 1" > /dev/null 2>&1; then
+                  echo "ERROR: Cannot connect to $HOST. Check password or service name."
+                  exit 1
+                fi
+
+                # 2. Get DB list (finds Grafana, Temporal, etc.)
+                DB_LIST=$(psql -h $HOST -U $USER -At -c "SELECT datname FROM pg_database WHERE datistemplate = false AND datname != 'postgres';")
 
                 for DB in $DB_LIST; do
-                  echo "Backing up: $DB"
-                  pg_dump -h postgresql -U postgres "$DB" > "$TARGET_DIR/$DB.sql"
+                  echo "Backing up: $DB..."
+                  if pg_dump -h $HOST -U $USER "$DB" > "$TARGET_DIR/$DB.sql"; then
+                    echo "  [SUCCESS] $DB"
+                  else
+                    echo "  [FAILED] $DB"
+                  fi
                 done
 
-                # 2. Rotation: Keep only the 5 most recent date folders
-                echo "Cleaning up old folders..."
-                cd /backups
-                # List directories by time, skip newest 5, delete the rest
-                ls -dt */ | tail -n +6 | xargs -I {} rm -rf "{}"
-
-                echo "--- Current backup folders on disk ---"
-                ls -F /backups
-          restartPolicy: OnFailure
+                # 3. Prevent immediate exit (Optional for debugging)
+                echo "Backup cycle complete. Files in $TARGET_DIR:"
+                ls -lh "$TARGET_DIR"
           volumes:
           - name: backup-dir
             persistentVolumeClaim:
