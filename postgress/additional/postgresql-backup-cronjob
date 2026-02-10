@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgresql-backup
+  namespace: postgresql
+spec:
+  schedule: "*/1 * * * *" 
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: postgres:16
+              env:
+                # We use 'admin' because that's what you set in values.yaml
+                - name: PGUSER
+                  value: "admin"
+                # Here we pull the password directly from your existing secret
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgresql-secrets
+                      key: user_password
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backups
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  DATE=$(date +%Y-%m-%d_%H-%M)
+                  BACKUP_DIR="/backups/$DATE"
+                  mkdir -p "$BACKUP_DIR"
+
+                  echo "Backing up all databases for user $PGUSER..."
+                  
+                  # List databases (excluding system templates)
+                  DB_LIST=$(psql -h postgresql -U "$PGUSER" -At -c "SELECT datname FROM pg_database WHERE datistemplate = false AND datname != 'postgres';")
+
+                  for DB in $DB_LIST; do
+                    pg_dump -h postgresql -U "$PGUSER" "$DB" | gzip > "$BACKUP_DIR/$DB.sql.gz"
+                    echo "Successfully backed up $DB"
+                  done
+                  
+                  # Keep only last 5 days of backups
+                  find /backups -type d -mtime +5 -exec rm -rf {} +
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: postgres-local-backups
