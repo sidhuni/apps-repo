@@ -41,7 +41,7 @@ persistentVolumeClaimRetentionPolicy:
 # Extra secret mount for reference inside the container
 extraVolumeMounts:
   - name: postgresql-secrets
-    mountPath: /mnt/postgresql-secrets
+    mountPath: /opt/bitnami/postgresql/secrets
     readOnly: true
 
 extraVolumes:
