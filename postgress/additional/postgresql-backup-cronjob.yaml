@@ -38,19 +38,26 @@ spec:
                   BACKUP_DIR="/backups/$DATE"
                   mkdir -p "$BACKUP_DIR"
 
-                  echo "Connecting to fetch database list..."
+                  echo "--- Backup Started: $(date) ---"
                   
-                  # --- FIX: Added '-d postgres' here ---
-                  # We connect to 'postgres' database to run the query that lists all other DBs
+                  # Connect to 'postgres' to get the list of other databases
                   DB_LIST=$(psql -h postgresql -U "$PGUSER" -d postgres -At -c "SELECT datname FROM pg_database WHERE datistemplate = false AND datname != 'postgres';")
 
                   for DB in $DB_LIST; do
-                    echo "Backing up: $DB"
-                    pg_dump -h postgresql -U "$PGUSER" "$DB" | gzip > "$BACKUP_DIR/$DB.sql.gz"
+                    FILE_PATH="$BACKUP_DIR/$DB.sql.gz"
+                    echo "Backing up database: $DB ..."
+                    
+                    pg_dump -h postgresql -U "$PGUSER" "$DB" | gzip > "$FILE_PATH"
+                    
+                    # --- NEW: Get and print the file size ---
+                    SIZE=$(du -sh "$FILE_PATH" | cut -f1)
+                    echo "✅ Done: $DB.sql.gz (Size: $SIZE)"
                   done
-                  
+
+                  echo "Cleaning up backups older than 5 days..."
                   find /backups -type d -mtime +5 -exec rm -rf {} +
-                  echo "✅ Backup sequence complete."
+                  
+                  echo "--- All backups finished successfully ---"
           volumes:
             - name: backup-storage
               persistentVolumeClaim:
