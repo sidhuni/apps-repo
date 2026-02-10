@@ -38,4 +38,17 @@ readReplicas:
 
 persistentVolumeClaimRetentionPolicy:
   enabled: true
-  
+
+extraObjects:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: postgres-local-backups
+      namespace: postgresql
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: local-path
+      resources:
+        requests:
+          storage: 5Gi
