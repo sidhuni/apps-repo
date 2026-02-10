@@ -2,6 +2,7 @@ fullnameOverride: postgresql
 
 auth:
   enablePostgresUser: true      # enable postgres superuser (needed for backup/restore)
+  postgresPassword: NewSuperSecret123!
   username: admin               # your application user
   database: chms                # default DB to create
 
