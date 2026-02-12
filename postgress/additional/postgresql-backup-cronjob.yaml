@@ -57,17 +57,17 @@ spec:
               - |
                 set -e
                 
-                # 1. Point to the SPECIFIC version folder we saw in your logs
-                # We also add the 'dist' folder where the actual binary lives
-                export AWS_HOME=/opt/aws-tools/aws-cli/v2/2.33.20
+                # 1. DYNAMICALLY find the version folder (Handles any AWS update)
+                VERSION_DIR=$(ls /opt/aws-tools/aws-cli/v2/ | grep -v current | head -n 1)
+                export AWS_HOME=/opt/aws-tools/aws-cli/v2/$VERSION_DIR
                 export PATH=$PATH:$AWS_HOME/dist:$AWS_HOME/bin
                 
                 echo "--- Tools Check ---"
-                # Call the binary by its full path to be 100% sure
-                /opt/aws-tools/aws-cli/v2/2.33.20/dist/aws --version
+                # Use the dynamic path to verify
+                $AWS_HOME/dist/aws --version
                 
-                # Now set the alias so the rest of your script works
-                alias aws='/opt/aws-tools/aws-cli/v2/2.33.20/dist/aws'
+                # Set alias for convenience
+                alias aws="$AWS_HOME/dist/aws"
 
                 TIMESTAMP=$(date +%Y-%m-%d)
                 echo "--- Starting Backup for $TIMESTAMP ---"
@@ -77,7 +77,7 @@ spec:
 
                 for DB in $DB_LIST; do
                   echo "Backing up: $DB"
-                  # Use the full path for the aws command to prevent "command not found"
-                  
+                  # REAL BACKUP COMMAND (Don't forget the pg_dump!)
+                  pg_dump -h $PGHOST -U "$PGUSER" "$DB" | gzip | $AWS_HOME/dist/aws s3 cp - s3://$BUCKET/$TIMESTAMP/$DB.sql.gz
                   echo "✅ Uploaded $DB.sql.gz"
                 done
