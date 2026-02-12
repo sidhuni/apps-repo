@@ -4,20 +4,35 @@ metadata:
   name: postgresql-backup
   namespace: postgresql
 spec:
-  schedule: "*/1 * * * *"  # Once a minute for testing
+  schedule: "*/1 * * * *" 
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
       template:
         spec:
-          # This ensures the pod can write to the PVC on Rancher Desktop
           securityContext:
             fsGroup: 1001
           restartPolicy: OnFailure
+          
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: postgres-local-backups
+            - name: aws-tools # Shared space for the tools
+              emptyDir: {}
+
+          # THIS PART IS REQUIRED because Bitnami doesn't have curl/python
+          initContainers:
+          - name: install-aws
+            image: amazon/aws-cli:latest
+            command: ["/bin/sh", "-c", "cp -pr /usr/local/aws-cli /target/"]
+            volumeMounts:
+            - name: aws-tools
+              mountPath: /target
+
           containers:
             - name: backup
               image: registry-1.docker.io/bitnami/postgresql:latest
-              imagePullPolicy: IfNotPresent
               securityContext:
                 runAsUser: 1001
               env:
@@ -28,48 +43,33 @@ spec:
                     secretKeyRef:
                       name: postgresql-secrets
                       key: user_password
+                - name: BUCKET
+                  value: "postgresqlb-backup" # ADDED THIS
               volumeMounts:
                 - name: backup-storage
                   mountPath: /backups
+                - name: aws-tools
+                  mountPath: /opt/aws-tools
               command:
               - /bin/sh
               - -c
               - |
                 set -e
                 
-                # 1. Setup local environment
-                export HOME=/tmp/1001
-                mkdir -p $HOME/bin
-                export PATH=$PATH:$HOME/bin
-                cd /tmp
-
-                # 2. Use the Bundled Installer (Uses .tar.gz which Bitnami has 'tar' for)
-                echo "Downloading AWS CLI Bundled Installer..."
-                curl -s "https://s3.amazonaws.com/aws-cli/awscli-bundle.tar.gz" -o "awscli-bundle.tar.gz"
+                # Use the tools we "borrowed" from the initContainer
+                export PATH=$PATH:/opt/aws-tools/aws-cli/v2/current/dist
                 
-                echo "Extracting using tar..."
-                tar -xzf awscli-bundle.tar.gz
-                
-                echo "Installing AWS CLI..."
-                # The bundled installer is a self-contained script
-                ./awscli-bundle/install -i $HOME/aws-cli -b $HOME/bin/aws > /dev/null
-
-                # 3. Set current date for folder name
                 TIMESTAMP=$(date +%Y-%m-%d)
                 echo "--- Starting S3 Backup for $TIMESTAMP ---"
 
-                # 4. List all databases
+                # 1. Get DB List
                 DB_LIST=$(psql -h postgresql -U "$PGUSER" -d postgres -At -c "SELECT datname FROM pg_database WHERE datistemplate = false AND datname != 'postgres';")
 
-                # 5. Backup and Stream to S3
                 for DB in $DB_LIST; do
                   echo "Backing up: $DB"
+                  # 2. This now works because 'aws' is in the PATH
                   pg_dump -h postgresql -U "$PGUSER" "$DB" | gzip | aws s3 cp - s3://$BUCKET/$TIMESTAMP/$DB.sql.gz
                   echo "✅ Uploaded $DB.sql.gz to S3"
                 done
                 
                 echo "--- All backups finished successfully ---"
-          volumes:
-            - name: backup-storage
-              persistentVolumeClaim:
-                claimName: postgres-local-backups
