@@ -13,6 +13,10 @@ spec:
           securityContext:
             fsGroup: 1001
           restartPolicy: OnFailure
+
+          volumes:
+            - name: aws-cli-bin
+              emptyDir: {}
           
           volumes:
             - name: backup-storage
@@ -28,6 +32,8 @@ spec:
             command: ["/bin/sh", "-c", "cp -pr /usr/local/aws-cli /target/"]
             volumeMounts:
             - name: aws-tools
+              mountPath: /target
+            - name: aws-cli-bin
               mountPath: /target
 
           containers:
@@ -49,6 +55,8 @@ spec:
                 - name: backup-storage
                   mountPath: /backups
                 - name: aws-tools
+                  mountPath: /opt/aws-tools
+                - name: aws-cli-bin
                   mountPath: /opt/aws-tools
               command:
               - /bin/sh
