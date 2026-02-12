@@ -11,6 +11,9 @@ spec:
       template:
         spec:
           # This ensures the pod can write to the PVC on Rancher Desktop
+          securityContext:
+            fsGroup: 1001
+          restartPolicy: OnFailure
           serviceAccountName: "postgresql"
           volumes:
             - name: aws-cli-bin
