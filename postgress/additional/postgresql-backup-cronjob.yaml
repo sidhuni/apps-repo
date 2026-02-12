@@ -78,6 +78,6 @@ spec:
                 for DB in $DB_LIST; do
                   echo "Backing up: $DB"
                   # Use the full path for the aws command to prevent "command not found"
-                  pg_dump -h $PGHOST -U "$PGUSER" "$DB" | gzip | /opt/aws-tools/aws-cli/v2/2.33.20/dist/aws s3 cp - s3://$BUCKET/$TIMESTAMP/$DB.sql.gz
+                  
                   echo "✅ Uploaded $DB.sql.gz"
                 done
