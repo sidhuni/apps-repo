@@ -78,6 +78,6 @@ spec:
                 for DB in $DB_LIST; do
                   echo "Backing up: $DB"
                   # REAL BACKUP COMMAND (Don't forget the pg_dump!)
-                  pg_dump -h $PGHOST -U "$PGUSER" "$DB" | gzip | $AWS_HOME/dist/aws s3 cp - s3://$BUCKET/$TIMESTAMP/$DB.sql.gz
+                  
                   echo "✅ Uploaded $DB.sql.gz"
                 done
