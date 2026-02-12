@@ -14,14 +14,13 @@ spec:
             fsGroup: 1001
           restartPolicy: OnFailure
 
-          # ONLY ONE VOLUMES LIST
           volumes:
             - name: backup-storage
               persistentVolumeClaim:
                 claimName: postgres-local-backups
             - name: aws-tools 
               emptyDir: {}
-      
+
           initContainers:
           - name: install-aws
             image: amazon/aws-cli:latest
@@ -41,7 +40,7 @@ spec:
                 - name: PGPASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: postgresql-secrets
+                      name: postgresql-secrets # Matches the secret from Step 1
                       key: user_password
                 - name: BUCKET
                   value: "postgresqlb-backup"
@@ -50,35 +49,25 @@ spec:
               volumeMounts:
                 - name: backup-storage
                   mountPath: /backups
-                - name: aws-tools   # This name must match the name in the volumes list
+                - name: aws-tools
                   mountPath: /opt/aws-tools
-                - name: postgresql-secrets
-                  mountPath: "/mnt/postgresql-secrets"
-                  readOnly: true
               command:
               - /bin/sh
               - -c
               - |
                 set -e
-                
-                # Point to the dist folder where the 'aws' executable lives
                 export PATH=$PATH:/opt/aws-tools/aws-cli/v2/current/dist
                 
-                # Check tools (This will show up in your logs)
-                echo "--- Environment Check ---"
+                echo "--- Tools Check ---"
                 aws --version
                 
                 TIMESTAMP=$(date +%Y-%m-%d)
-                echo "--- Starting S3 Backup for $TIMESTAMP ---"
+                echo "--- Starting Backup for $TIMESTAMP ---"
 
-                # 1. Get DB List
                 DB_LIST=$(psql -h $PGHOST -U "$PGUSER" -d postgres -At -c "SELECT datname FROM pg_database WHERE datistemplate = false AND datname != 'postgres';")
 
                 for DB in $DB_LIST; do
                   echo "Backing up: $DB"
-                  # 2. pg_dump | gzip | aws s3
                   pg_dump -h $PGHOST -U "$PGUSER" "$DB" | gzip | aws s3 cp - s3://$BUCKET/$TIMESTAMP/$DB.sql.gz
-                  echo "✅ Uploaded $DB.sql.gz to S3"
+                  echo "✅ Uploaded $DB.sql.gz"
                 done
-                
-                echo "--- All backups finished successfully ---"
