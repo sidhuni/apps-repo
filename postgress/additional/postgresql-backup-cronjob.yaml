@@ -29,20 +29,26 @@ spec:
               - -c
               - |
                 set -e
-                # 1. Update and install tools (This is why we use Ubuntu!)
-                apt-get update && apt-get install -y curl unzip postgresql-client gzip
+                # 1. Add Postgres 18 Repo (Required because Ubuntu 24.04 only has v16)
+                apt-get update && apt-get install -y curl ca-certificates gnupg
+                install -d /usr/share/postgresql-common/pgdg
+                curl -fsSL https://www.postgresql.org | gpg --dearmor -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg
+                echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg] http://apt.postgresql.org noble-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+
+                # 2. Install Tools (Notice postgresql-client-18)
+                apt-get update && apt-get install -y postgresql-client-18 unzip gzip
                 
-                # 2. Install AWS CLI v2
+                # 3. Fix AWS Download URL (You were missing /awscli-exe-linux-x86_64.zip)
                 curl "https://awscli.amazonaws.com" -o "awscliv2.zip"
                 unzip -q awscliv2.zip && ./aws/install
                 
-                # 3. Perform backup and upload to S3
+                # 4. Perform backup
                 TIMESTAMP=$(date +%Y-%m-%d)
-                # Get the list of databases from the Bitnami pod via the network
                 DB_LIST=$(psql -h $PGHOST -U "$PGUSER" -d postgres -At -c "SELECT datname FROM pg_database WHERE datistemplate = false AND datname != 'postgres';")
 
                 for DB in $DB_LIST; do
                   echo "Backing up: $DB"
                   pg_dump -h $PGHOST -U "$PGUSER" "$DB" | gzip | aws s3 cp - s3://$BUCKET/$TIMESTAMP/$DB.sql.gz
+                  echo "✅ Uploaded $DB"
                 done
           restartPolicy: OnFailure
