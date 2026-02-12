@@ -25,6 +25,9 @@ spec:
           containers:
             - name: backup
               image: registry-1.docker.io/bitnami/postgresql:latest
+              imagePullPolicy: IfNotPresent
+              securityContext:
+                runAsUser: 1001
               env:
                 - name: PGUSER
                   value: "admin"
