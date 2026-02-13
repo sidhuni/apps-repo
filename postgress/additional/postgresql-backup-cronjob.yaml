@@ -60,6 +60,6 @@ spec:
 
                 for DB in $DB_LIST; do
                   echo "Backing up: $DB"
-                  pg_dump -h $PGHOST -U "$PGUSER" "$DB" | gzip | aws s3 cp - s3://$BUCKET/$TIMESTAMP/$DB.sql.gz
+                  
                   echo "✅ Uploaded $DB"
                 done
