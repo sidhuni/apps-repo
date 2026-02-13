@@ -9,6 +9,7 @@ spec:
     spec:
       template:
         spec:
+          restartPolicy: OnFailure
           containers:
           - name: backup-worker
             image: public.ecr.aws/docker/library/ubuntu:24.04
