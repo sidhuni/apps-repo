@@ -3,7 +3,7 @@ fullnameOverride: postgresql
 auth:
   enablePostgresUser: true
   username: admin
-  database: chms
+  database: ""
   existingSecret: "postgresql-secrets"
   secretKeys:
     adminPasswordKey: postgres_password
