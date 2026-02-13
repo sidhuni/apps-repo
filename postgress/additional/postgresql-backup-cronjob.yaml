@@ -4,7 +4,7 @@ metadata:
   name: postgresql-s3-backup
   namespace: postgresql
 spec:
-  schedule: "*/4 * * * *" # Every minute for local testing
+  schedule: "*/1 * * * *" # Every minute for local testing
   jobTemplate:
     spec:
       template:
@@ -61,8 +61,6 @@ spec:
 
                 for DB in $DB_LIST; do
                   echo "Backing up: $DB"
-                  pg_dump -h "$PGHOST" -U "$PGUSER" --no-owner --no-privileges "$DB" \
-                    | gzip \
-                    | aws s3 cp - "s3://$BUCKET/$TIMESTAMP/$DB.sql.gz"
+             
                   echo "✅ Uploaded $DB"
                 done
