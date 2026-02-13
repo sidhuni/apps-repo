@@ -4,7 +4,7 @@ metadata:
   name: postgresql-s3-backup
   namespace: postgresql
 spec:
-  schedule: "*/1 * * * *" # Every minute for local testing
+  schedule: "*/4 * * * *" # Every minute for local testing
   jobTemplate:
     spec:
       template:
@@ -31,33 +31,30 @@ spec:
               - |
                 set -e
                 
-                # 1. Install basics
-                apt-get update && apt-get install -y curl ca-certificates gnupg unzip gzip
+                # 1. Use the official helper to add the Postgres 18 repository
+                # This avoids manual GPG folder and path errors.
+                apt-get update && apt-get install -y curl ca-certificates postgresql-common
+                yes | /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
                 
-                # 2. FIX: Create the directory BEFORE running gpg
-                mkdir -p /usr/share/postgresql-common/pgdg/
+                # 2. Install the Client (Notice version 18 to match your server)
+                apt-get update && apt-get install -y postgresql-client-18 unzip gzip
                 
-                # 3. Download the key with -Lk (L follows redirects, k ignores SSL errors)
-                # If curl still fails, we skip GPG and use 'trusted=yes' as a backup
-                curl -fsSLk https://www.postgresql.org | gpg --dearmor -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg || true
-                
-                # 4. Add the Repo
-                echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg] http://apt.postgresql.org noble-pgdg main" > /etc/apt/sources.list.d/pgdg.list
-
-                # 5. Install Postgres Client 18
-                apt-get update && apt-get install -y postgresql-client-18
-                
-                # 6. Install AWS CLI v2 for your Mac (ARM64)
+                # 3. Use the RELIABLE ARM64 download link for AWS CLI
+                # We use -L (follow redirects) and -k (ignore SSL if network is unstable)
                 echo "Downloading AWS CLI for ARM64..."
-                curl -Lk "https://awscli.amazonaws.com" -o "awscliv2.zip"
+                curl -Lk "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+                
+                # Verify file size before unzipping to avoid 'End-of-central-directory' error
+                if [ ! -s awscliv2.zip ]; then echo "Download failed: File is empty"; exit 1; fi
+                
                 unzip -q awscliv2.zip && ./aws/install
                 
-                # 7. Final Test
+                # 4. Final verification
                 echo "--- Tool Versions ---"
                 aws --version
                 pg_dump --version
 
-                # 8. Backup Logic
+                # 5. Backup Logic
                 TIMESTAMP=$(date +%Y-%m-%d)
                 DB_LIST=$(psql -h $PGHOST -U "$PGUSER" -d postgres -At -c "SELECT datname FROM pg_database WHERE datistemplate = false AND datname != 'postgres';")
 
